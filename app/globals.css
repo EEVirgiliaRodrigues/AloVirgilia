@@ -19,7 +19,6 @@
 }
 
 [data-theme="light"] {
-  --manchete-bg-opacity: 0.06;
   --bg: #faf9f6;
   --bg2: #f0ede6;
   --border: #d8d4ca;
@@ -28,6 +27,71 @@
   --muito-muted: #9a9490;
   --acento: #c8392b;
 }
+
+/* ── Ajustes tema claro ── */
+
+/* Manchete */
+[data-theme="light"] .manchete-bg-img { opacity: 0.35 !important; }
+[data-theme="light"] .manchete { background: transparent; }
+[data-theme="light"] .manchete-titulo { color: #1a1816; text-shadow: 0 1px 3px rgba(250,249,246,0.8); }
+[data-theme="light"] .manchete-titulo:hover { color: var(--acento); }
+[data-theme="light"] .manchete-sub { color: #2a2520; }
+[data-theme="light"] .manchete-btn { color: #1a1816; border-color: #1a1816; }
+[data-theme="light"] .manchete-btn:hover { border-color: var(--acento); color: var(--acento); }
+[data-theme="light"] .manchete-cat { color: var(--acento); }
+[data-theme="light"] .manchete-meta { color: #3a3530; }
+
+/* Header */
+[data-theme="light"] .header-top { color: var(--muted); border-color: var(--border); }
+[data-theme="light"] .header-brand-row { border-color: var(--border); }
+[data-theme="light"] .site-nav { border-color: var(--border); }
+[data-theme="light"] .site-nav a { color: #1a1816; }
+[data-theme="light"] .site-nav a:hover { color: var(--acento); }
+[data-theme="light"] .nav-link.ativo { color: var(--acento); border-color: var(--acento); }
+[data-theme="light"] .header-live { color: var(--muted); }
+
+/* Ticker */
+[data-theme="light"] .ticker-wrap { background: var(--acento); }
+
+/* Cards */
+[data-theme="light"] .gcard { background: var(--bg); border: 1px solid var(--border); }
+[data-theme="light"] .gcard-titulo a { color: #1a1816; }
+[data-theme="light"] .gcard-titulo a:hover { color: var(--acento); }
+[data-theme="light"] .gcard-meta { color: #5a5550; }
+[data-theme="light"] .gcard-cat { color: inherit; }
+[data-theme="light"] .grade-label { color: #1a1816; }
+[data-theme="light"] .grade-line { background: var(--border); }
+
+/* Editorias sidebar */
+[data-theme="light"] .sidebar-label { color: #1a1816; }
+[data-theme="light"] .ed-card { background: var(--bg); border: 1px solid var(--border); }
+[data-theme="light"] .ed-desc { color: #5a5550; }
+
+/* Post */
+[data-theme="light"] .post-body { color: #1a1816; }
+[data-theme="light"] .post-body p { color: #2a2520; }
+[data-theme="light"] .post-body h2 { color: #1a1816; border-color: var(--border); }
+[data-theme="light"] .post-body h3 { color: #1a1816; }
+[data-theme="light"] .post-body blockquote { color: #2a2520; border-color: var(--acento); }
+[data-theme="light"] .post-body strong { color: #1a1816; }
+[data-theme="light"] .post-title { color: #1a1816; }
+[data-theme="light"] .post-subtitle { color: #3a3530; }
+[data-theme="light"] .post-byline { color: #5a5550; }
+[data-theme="light"] .post-cover figcaption { color: #5a5550; }
+[data-theme="light"] .back-link { color: #1a1816; }
+[data-theme="light"] .back-link:hover { color: var(--acento); }
+
+/* Footer */
+[data-theme="light"] .site-footer { background: #e8e4dc; border-top: 1px solid var(--border); }
+[data-theme="light"] .footer-brand { color: #1a1816; }
+[data-theme="light"] .footer-tagline { color: #5a5550; }
+[data-theme="light"] .footer-link { color: #3a3530; border-color: var(--border); }
+[data-theme="light"] .footer-link:hover { color: var(--acento); }
+[data-theme="light"] .footer-copy { color: #5a5550; }
+
+/* Busca */
+[data-theme="light"] .busca-input { background: var(--bg); color: #1a1816; border-color: var(--border); }
+[data-theme="light"] .busca-label { color: #1a1816; }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
@@ -161,9 +225,6 @@ img { max-width: 100%; display: block; }
 .post-body strong { font-weight: 500; color: var(--texto); }
 .post-body a { color: var(--acento); border-bottom: 1px solid rgba(200,57,43,0.3); }
 .post-body img { margin: 1.5rem 0; width: 100%; }
-.post-body div[style*="float"] { max-width: 45%; }
-.post-body div[style*="float"] img { margin: 0; width: 100%; }
-.post-body::after { content: ""; display: table; clear: both; }
 .post-footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
 .back-link { font-family: var(--fonte-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muito-muted); transition: color 0.2s; }
 .back-link:hover { color: var(--acento); }
@@ -398,6 +459,3 @@ img { max-width: 100%; display: block; }
 
 /* ── Highlight na busca ── */
 .busca-highlight { background: rgba(200, 57, 43, 0.18); color: var(--acento); font-style: normal; padding: 0 2px; }
-
-
-
