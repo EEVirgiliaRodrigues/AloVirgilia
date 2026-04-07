@@ -17,6 +17,7 @@ interface Frontmatter {
 type Bloco =
   | { tipo: 'texto'; conteudo: string }
   | { tipo: 'imagem-flutuante'; src: string; lado: 'left' | 'right'; largura: string; legenda: string; textoAoLado: string }
+  | { tipo: 'video'; url: string; legenda: string }
 
 const categorias = [
   { value: 'escola', label: 'Escola' },
@@ -51,11 +52,25 @@ function parseFrontmatter(raw: string): { fm: Frontmatter; content: string } {
   }
 }
 
+// Extrai ID do YouTube de qualquer formato de URL
+function getYoutubeId(url: string): string | null {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/)
+  return m ? m[1] : null
+}
+
 // Converte blocos para MDX final
 function blocosParaMDX(blocos: Bloco[]): string {
   return blocos.map(b => {
     if (b.tipo === 'texto') return b.conteudo
     const margin = b.lado === 'right' ? '0.5rem 0 1rem 1.5rem' : '0.5rem 1.5rem 1rem 0'
+    if (b.tipo === 'video') {
+      const id = getYoutubeId(b.url)
+      if (!id) return b.legenda ? `*${b.legenda}*` : ''
+      return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:1.5rem 0;border-radius:8px">
+  <iframe src="https://www.youtube.com/embed/${id}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen loading="lazy"></iframe>
+</div>${b.legenda ? `
+*${b.legenda}*` : ''}`
+    }
     return `<div style="float:${b.lado};margin:${margin};width:${b.largura}">
   <img src="${b.src}" alt="${b.legenda}" style="width:100%;border-radius:4px" />
   ${b.legenda ? `<p style="font-size:0.75rem;color:#888;text-align:center;margin-top:0.25rem;font-style:italic">${b.legenda}</p>` : ''}
@@ -89,6 +104,28 @@ function mdxParaBlocos(content: string): Bloco[] {
   }
   const resto = content.slice(lastIndex).trim()
   if (resto) resultado.push({ tipo: 'texto', conteudo: resto })
+  // Detectar blocos de video
+  const videoRegex = /<div style="position:relative;padding-bottom:56\.25%[^>]*>[\s\S]*?<\/div>(?:\n\*([^*]*)\*)?/g
+  let resultado2: Bloco[] = []
+  let lastIndex2 = 0
+  let match2
+  const contentToProcess = resultado.length === 1 && resultado[0].tipo === 'texto' ? (resultado[0] as any).conteudo : null
+  if (contentToProcess) {
+    while ((match2 = videoRegex.exec(contentToProcess)) !== null) {
+      const antes = contentToProcess.slice(lastIndex2, match2.index).trim()
+      if (antes) resultado2.push({ tipo: 'texto', conteudo: antes })
+      const iframeM = match2[0].match(/embed\/([\w-]{11})/)
+      if (iframeM) {
+        resultado2.push({ tipo: 'video', url: `https://www.youtube.com/watch?v=${iframeM[1]}`, legenda: match2[1] || '' })
+      }
+      lastIndex2 = match2.index + match2[0].length
+    }
+    if (resultado2.length > 0) {
+      const resto2 = contentToProcess.slice(lastIndex2).trim()
+      if (resto2) resultado2.push({ tipo: 'texto', conteudo: resto2 })
+      resultado = resultado2
+    }
+  }
   if (resultado.length === 0) resultado.push({ tipo: 'texto', conteudo: content })
   return resultado
 }
@@ -169,9 +206,11 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
     setUploadingIdx(null)
   }
 
-  function addBloco(tipo: 'texto' | 'imagem-flutuante', aposIdx: number) {
+  function addBloco(tipo: 'texto' | 'imagem-flutuante' | 'video', aposIdx: number) {
     const novo: Bloco = tipo === 'texto'
       ? { tipo: 'texto', conteudo: '' }
+      : tipo === 'video'
+      ? { tipo: 'video', url: '', legenda: '' }
       : { tipo: 'imagem-flutuante', src: '', lado: 'right', largura: '220px', legenda: '', textoAoLado: '' }
     setBlocos(prev => {
       const next = [...prev]
@@ -380,10 +419,42 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                   </div>
                 )}
 
+                {/* Bloco video */}
+                {bloco.tipo === 'video' && (
+                  <div style={{ ...s.blocoTexto, borderColor: '#4a9fd4' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                      <span style={{ color: '#4a9fd4', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>📹 Vídeo do YouTube</span>
+                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '0.75rem' }}>
+                      <div>
+                        <label style={s.label}>Link do YouTube</label>
+                        <input style={s.input} value={bloco.url}
+                          onChange={e => updateBloco(idx, { url: e.target.value })}
+                          placeholder="https://www.youtube.com/watch?v=..." />
+                      </div>
+                      {bloco.url && getYoutubeId(bloco.url) && (
+                        <div style={{ position: 'relative', paddingBottom: '30%', height: 0, overflow: 'hidden', borderRadius: '6px', maxWidth: '400px' }}>
+                          <iframe src={`https://www.youtube.com/embed/${getYoutubeId(bloco.url)}`}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+                            allowFullScreen />
+                        </div>
+                      )}
+                      <div>
+                        <label style={s.label}>Legenda (opcional)</label>
+                        <input style={s.input} value={bloco.legenda}
+                          onChange={e => updateBloco(idx, { legenda: e.target.value })}
+                          placeholder="Descrição do vídeo" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Botões para adicionar bloco após este */}
                 <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', padding: '0.25rem 0' }}>
                   <button style={s.addBtn} onClick={() => addBloco('texto', idx)}>+ Texto</button>
                   <button style={s.addBtn} onClick={() => addBloco('imagem-flutuante', idx)}>+ Imagem com texto ao lado</button>
+                  <button style={s.addBtn} onClick={() => addBloco('video', idx)}>+ Vídeo</button>
                 </div>
               </div>
             ))}
