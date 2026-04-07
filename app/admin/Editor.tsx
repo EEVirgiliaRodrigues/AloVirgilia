@@ -138,6 +138,7 @@ const s: Record<string, React.CSSProperties> = {
   input: { width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '0.7rem 1rem', color: '#f0ede6', fontSize: '0.95rem', outline: 'none', fontFamily: 'Space Grotesk, sans-serif' },
   select: { width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '0.7rem 1rem', color: '#f0ede6', fontSize: '0.95rem', outline: 'none', fontFamily: 'Space Grotesk, sans-serif' },
   saveBtn: { background: '#c8392b', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.6rem 1.5rem', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' },
+  toolBtn: { background: '#0a0a0a', border: '1px solid #1e1e1e', borderRadius: '4px', padding: '0.3rem 0.6rem', color: '#888', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'Space Grotesk, sans-serif' },
   blocoTexto: { background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px', padding: '1rem', marginBottom: '0.5rem' },
   blocoImagem: { background: '#111', border: '2px solid #c8392b', borderRadius: '8px', padding: '1.25rem', marginBottom: '0.5rem' },
   addBtn: { background: 'transparent', border: '1px dashed #444', borderRadius: '6px', padding: '0.6rem 1rem', color: '#888', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'Space Grotesk, sans-serif' },
@@ -245,6 +246,52 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
     }
   }
 
+  // Aplica formatação no textarea do bloco de texto
+  function aplicarFormatacao(idx: number, tipo: string) {
+    const ta = document.querySelector(`[data-bloco="${idx}"]`) as HTMLTextAreaElement
+    if (!ta) return
+    const start = ta.selectionStart
+    const end = ta.selectionEnd
+    const bloco = blocos[idx]
+    if (bloco.tipo !== 'texto') return
+    const texto = bloco.conteudo
+    const selecionado = texto.slice(start, end)
+
+    let novo = texto
+    let cursorStart = start
+    let cursorEnd = end
+
+    if (tipo === 'negrito') {
+      novo = texto.slice(0, start) + `**${selecionado}**` + texto.slice(end)
+      cursorStart = start + 2; cursorEnd = end + 2
+    } else if (tipo === 'italico') {
+      novo = texto.slice(0, start) + `*${selecionado}*` + texto.slice(end)
+      cursorStart = start + 1; cursorEnd = end + 1
+    } else if (tipo === 'h2') {
+      const lineStart = texto.lastIndexOf('\n', start - 1) + 1
+      novo = texto.slice(0, lineStart) + '## ' + texto.slice(lineStart)
+      cursorStart = start + 3; cursorEnd = end + 3
+    } else if (tipo === 'h3') {
+      const lineStart = texto.lastIndexOf('\n', start - 1) + 1
+      novo = texto.slice(0, lineStart) + '### ' + texto.slice(lineStart)
+      cursorStart = start + 4; cursorEnd = end + 4
+    } else if (tipo === 'citacao') {
+      const lineStart = texto.lastIndexOf('\n', start - 1) + 1
+      novo = texto.slice(0, lineStart) + '> ' + texto.slice(lineStart)
+      cursorStart = start + 2; cursorEnd = end + 2
+    } else if (tipo === 'lista') {
+      const lineStart = texto.lastIndexOf('\n', start - 1) + 1
+      novo = texto.slice(0, lineStart) + '- ' + texto.slice(lineStart)
+      cursorStart = start + 2; cursorEnd = end + 2
+    }
+
+    updateBloco(idx, { conteudo: novo })
+    setTimeout(() => {
+      ta.focus()
+      ta.setSelectionRange(cursorStart, cursorEnd)
+    }, 10)
+  }
+
   if (loading) return (
     <div style={{ ...s.page, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
       Carregando matéria...
@@ -339,7 +386,31 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                         <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
                       )}
                     </div>
+                    {/* Toolbar de formatação */}
+                    <div style={{ display: 'flex', gap: '0.3rem', marginBottom: '0.5rem', flexWrap: 'wrap' as const }}>
+                      {[
+                        { tipo: 'negrito', label: 'N', title: 'Negrito', style: { fontWeight: 'bold' as const } },
+                        { tipo: 'italico', label: 'I', title: 'Itálico', style: { fontStyle: 'italic' as const } },
+                        { tipo: 'h2', label: 'H2', title: 'Título' },
+                        { tipo: 'h3', label: 'H3', title: 'Subtítulo' },
+                        { tipo: 'citacao', label: '" "', title: 'Citação em destaque' },
+                        { tipo: 'lista', label: '• Lista', title: 'Lista' },
+                      ].map(btn => (
+                        <button
+                          key={btn.tipo}
+                          title={btn.title}
+                          onClick={() => aplicarFormatacao(idx, btn.tipo)}
+                          style={{
+                            ...s.toolBtn,
+                            ...btn.style,
+                          }}
+                        >
+                          {btn.label}
+                        </button>
+                      ))}
+                    </div>
                     <textarea
+                      data-bloco={idx}
                       style={{ ...s.input, minHeight: '120px', resize: 'vertical' as const, lineHeight: '1.7' }}
                       value={bloco.conteudo}
                       onChange={e => updateBloco(idx, { conteudo: e.target.value })}
