@@ -30,16 +30,29 @@
 
 /* ── Ajustes tema claro ── */
 
-/* Manchete — no tema claro usa overlay escuro igual ao escuro */
-[data-theme="light"] .manchete-bg-img { opacity: 0.6 !important; filter: brightness(0.5); }
-[data-theme="light"] .manchete { background: transparent; }
-[data-theme="light"] .manchete-titulo { color: #f0ede6; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
-[data-theme="light"] .manchete-titulo:hover { color: var(--acento); }
-[data-theme="light"] .manchete-sub { color: #d0cdc6; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
-[data-theme="light"] .manchete-btn { color: #f0ede6; border-color: rgba(240,237,230,0.6); }
-[data-theme="light"] .manchete-btn:hover { border-color: var(--acento); color: var(--acento); }
-[data-theme="light"] .manchete-cat { color: var(--acento); }
-[data-theme="light"] .manchete-meta { color: #888; }
+/* ── Manchete dois temas ── */
+
+/* Tema escuro: mostra dark, esconde light */
+.manchete-dark { display: block; }
+.manchete-light { display: none; }
+
+/* Tema claro: mostra light, esconde dark */
+[data-theme="light"] .manchete-dark { display: none; }
+[data-theme="light"] .manchete-light { display: block; }
+
+/* Manchete light — imagem nítida em cima, texto embaixo */
+.manchete-light { padding: 0; border-right: 1px solid var(--border); overflow: hidden; }
+.manchete-light-img-wrap { display: block; width: 100%; overflow: hidden; }
+.manchete-light-img { width: 100%; height: 320px; object-fit: cover; display: block; transition: transform 0.4s ease; }
+.manchete-light-img-wrap:hover .manchete-light-img { transform: scale(1.02); }
+.manchete-light-body { padding: 1.25rem 1.5rem; }
+[data-theme="light"] .manchete-light .manchete-titulo { color: #1a1816; }
+[data-theme="light"] .manchete-light .manchete-titulo:hover { color: var(--acento); }
+[data-theme="light"] .manchete-light .manchete-sub { color: #3a3530; }
+[data-theme="light"] .manchete-light .manchete-btn { color: #1a1816; border-color: #1a1816; }
+[data-theme="light"] .manchete-light .manchete-btn:hover { border-color: var(--acento); color: var(--acento); }
+[data-theme="light"] .manchete-light .manchete-cat { color: var(--acento); }
+[data-theme="light"] .manchete-light .manchete-meta { color: #5a5550; }
 
 /* Header */
 [data-theme="light"] .header-top { color: var(--muted); border-color: var(--border); }

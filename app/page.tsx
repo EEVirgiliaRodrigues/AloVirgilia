@@ -24,9 +24,11 @@ export default function Home() {
         <div className="capa-wrap">
           {destaque ? (
             <section className="capa-main">
-              <div className="manchete" style={{ position: 'relative', overflow: 'hidden' }}>
+
+              {/* ── Manchete tema ESCURO (imagem de fundo com opacidade) ── */}
+              <div className="manchete manchete-dark" style={{ position: 'relative', overflow: 'hidden' }}>
                 {destaque.image && (
-                  <div style={{
+                  <div className="manchete-bg-img" style={{
                     position: 'absolute',
                     inset: 0,
                     backgroundImage: `url(${destaque.image})`,
@@ -37,6 +39,34 @@ export default function Home() {
                   }} />
                 )}
                 <div style={{ position: 'relative', zIndex: 1 }}>
+                  <div className={`manchete-cat cat-${destaque.category}`}>
+                    {destaque.category.toUpperCase()}
+                  </div>
+                  <h1 className="manchete-titulo">
+                    <Link href={`/post/${destaque.slug}`}>{destaque.title}</Link>
+                  </h1>
+                  {destaque.subtitle && (
+                    <p className="manchete-sub">{destaque.subtitle}</p>
+                  )}
+                  <div className="manchete-meta">
+                    <span>{destaque.author}</span>
+                    <span className="sep">·</span>
+                    <span>{formatDate(destaque.date)}</span>
+                  </div>
+                  <Link href={`/post/${destaque.slug}`} className="manchete-btn">
+                    Leia a matéria →
+                  </Link>
+                </div>
+              </div>
+
+              {/* ── Manchete tema CLARO (imagem nítida em cima, texto embaixo) ── */}
+              <div className="manchete manchete-light">
+                {destaque.image && (
+                  <Link href={`/post/${destaque.slug}`} className="manchete-light-img-wrap">
+                    <img src={destaque.image} alt={destaque.title} className="manchete-light-img" />
+                  </Link>
+                )}
+                <div className="manchete-light-body">
                   <div className={`manchete-cat cat-${destaque.category}`}>
                     {destaque.category.toUpperCase()}
                   </div>
