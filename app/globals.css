@@ -30,16 +30,16 @@
 
 /* ── Ajustes tema claro ── */
 
-/* Manchete */
-[data-theme="light"] .manchete-bg-img { opacity: 0.35 !important; }
+/* Manchete — no tema claro usa overlay escuro igual ao escuro */
+[data-theme="light"] .manchete-bg-img { opacity: 0.6 !important; filter: brightness(0.5); }
 [data-theme="light"] .manchete { background: transparent; }
-[data-theme="light"] .manchete-titulo { color: #1a1816; text-shadow: 0 1px 3px rgba(250,249,246,0.8); }
+[data-theme="light"] .manchete-titulo { color: #f0ede6; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
 [data-theme="light"] .manchete-titulo:hover { color: var(--acento); }
-[data-theme="light"] .manchete-sub { color: #2a2520; }
-[data-theme="light"] .manchete-btn { color: #1a1816; border-color: #1a1816; }
+[data-theme="light"] .manchete-sub { color: #d0cdc6; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+[data-theme="light"] .manchete-btn { color: #f0ede6; border-color: rgba(240,237,230,0.6); }
 [data-theme="light"] .manchete-btn:hover { border-color: var(--acento); color: var(--acento); }
 [data-theme="light"] .manchete-cat { color: var(--acento); }
-[data-theme="light"] .manchete-meta { color: #3a3530; }
+[data-theme="light"] .manchete-meta { color: #888; }
 
 /* Header */
 [data-theme="light"] .header-top { color: var(--muted); border-color: var(--border); }
