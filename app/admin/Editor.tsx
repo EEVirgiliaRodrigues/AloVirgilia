@@ -62,7 +62,6 @@ function getYoutubeId(url: string): string | null {
 function blocosParaMDX(blocos: Bloco[]): string {
   return blocos.map(b => {
     if (b.tipo === 'texto') return b.conteudo
-    const margin = b.lado === 'right' ? '0.5rem 0 1rem 1.5rem' : '0.5rem 1.5rem 1rem 0'
     if (b.tipo === 'video') {
       const id = getYoutubeId(b.url)
       if (!id) return b.legenda ? `*${b.legenda}*` : ''
@@ -71,6 +70,7 @@ function blocosParaMDX(blocos: Bloco[]): string {
 </div>${b.legenda ? `
 *${b.legenda}*` : ''}`
     }
+    const margin = b.lado === 'right' ? '0.5rem 0 1rem 1.5rem' : '0.5rem 1.5rem 1rem 0'
     return `<div style="float:${b.lado};margin:${margin};width:${b.largura}">
   <img src="${b.src}" alt="${b.legenda}" style="width:100%;border-radius:4px" />
   ${b.legenda ? `<p style="font-size:0.75rem;color:#888;text-align:center;margin-top:0.25rem;font-style:italic">${b.legenda}</p>` : ''}
