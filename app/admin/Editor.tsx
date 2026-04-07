@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -12,6 +12,11 @@ interface Frontmatter {
   image: string
   image_caption: string
 }
+
+// Bloco de conteúdo — texto puro ou imagem flutuante
+type Bloco =
+  | { tipo: 'texto'; conteudo: string }
+  | { tipo: 'imagem-flutuante'; src: string; lado: 'left' | 'right'; largura: string; legenda: string; textoAoLado: string }
 
 const categorias = [
   { value: 'escola', label: 'Escola' },
@@ -29,8 +34,8 @@ function parseFrontmatter(raw: string): { fm: Frontmatter; content: string } {
   const fmRaw = match[1]
   const content = match[2].trim()
   const get = (key: string) => {
-    const m = fmRaw.match(new RegExp(`^${key}:\\s*'?(.*?)'?$`, 'm'))
-    return m ? m[1].replace(/''/g, "'") : ''
+    const m = fmRaw.match(new RegExp(`^${key}:\\s*['"]?(.*?)['"]?$`, 'm'))
+    return m ? m[1] : ''
   }
   return {
     fm: {
@@ -46,6 +51,62 @@ function parseFrontmatter(raw: string): { fm: Frontmatter; content: string } {
   }
 }
 
+// Converte blocos para MDX final
+function blocosParaMDX(blocos: Bloco[]): string {
+  return blocos.map(b => {
+    if (b.tipo === 'texto') return b.conteudo
+    const margin = b.lado === 'right' ? '0.5rem 0 1rem 1.5rem' : '0.5rem 1.5rem 1rem 0'
+    return `<div style="float:${b.lado};margin:${margin};width:${b.largura}">
+  <img src="${b.src}" alt="${b.legenda}" style="width:100%;border-radius:4px" />
+  ${b.legenda ? `<p style="font-size:0.75rem;color:#888;text-align:center;margin-top:0.25rem;font-style:italic">${b.legenda}</p>` : ''}
+</div>
+${b.textoAoLado}
+<div style="clear:both"></div>`
+  }).join('\n\n')
+}
+
+// Converte MDX existente em blocos
+function mdxParaBlocos(content: string): Bloco[] {
+  if (!content.trim()) return [{ tipo: 'texto', conteudo: '' }]
+  // Tenta detectar blocos de imagem flutuante existentes
+  const regex = /<div style="float:(left|right);[^"]*width:([^"]+)">\s*<img src="([^"]*)"[^>]*\/>\s*(?:<p[^>]*>([^<]*)<\/p>)?\s*<\/div>\n?([\s\S]*?)<div style="clear:both"><\/div>/g
+  let resultado: Bloco[] = []
+  let lastIndex = 0
+  let match
+  while ((match = regex.exec(content)) !== null) {
+    // Texto antes
+    const antes = content.slice(lastIndex, match.index).trim()
+    if (antes) resultado.push({ tipo: 'texto', conteudo: antes })
+    resultado.push({
+      tipo: 'imagem-flutuante',
+      lado: match[1] as 'left' | 'right',
+      largura: match[2],
+      src: match[3],
+      legenda: match[4] || '',
+      textoAoLado: match[5].trim(),
+    })
+    lastIndex = match.index + match[0].length
+  }
+  const resto = content.slice(lastIndex).trim()
+  if (resto) resultado.push({ tipo: 'texto', conteudo: resto })
+  if (resultado.length === 0) resultado.push({ tipo: 'texto', conteudo: content })
+  return resultado
+}
+
+const s: Record<string, React.CSSProperties> = {
+  page: { minHeight: '100vh', background: '#0a0a0a', fontFamily: 'Space Grotesk, sans-serif', color: '#f0ede6' },
+  header: { borderBottom: '1px solid #1e1e1e', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: '#0a0a0a', zIndex: 10 },
+  main: { maxWidth: '860px', margin: '0 auto', padding: '2rem' },
+  label: { display: 'block', color: '#888', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' },
+  input: { width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '0.7rem 1rem', color: '#f0ede6', fontSize: '0.95rem', outline: 'none', fontFamily: 'Space Grotesk, sans-serif' },
+  select: { width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '0.7rem 1rem', color: '#f0ede6', fontSize: '0.95rem', outline: 'none', fontFamily: 'Space Grotesk, sans-serif' },
+  saveBtn: { background: '#c8392b', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.6rem 1.5rem', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' },
+  blocoTexto: { background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px', padding: '1rem', marginBottom: '0.5rem' },
+  blocoImagem: { background: '#111', border: '2px solid #c8392b', borderRadius: '8px', padding: '1.25rem', marginBottom: '0.5rem' },
+  addBtn: { background: 'transparent', border: '1px dashed #444', borderRadius: '6px', padding: '0.6rem 1rem', color: '#888', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'Space Grotesk, sans-serif' },
+  removeBtn: { background: 'transparent', border: 'none', color: '#444', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'Space Grotesk, sans-serif', padding: '0' },
+}
+
 export default function Editor({ slug: slugProp }: { slug?: string }) {
   const router = useRouter()
   const isEdit = !!slugProp
@@ -54,19 +115,13 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
     title: '', subtitle: '', author: '', date: new Date().toISOString().split('T')[0],
     category: 'escola', image: '', image_caption: '',
   })
-  const [content, setContent] = useState('')
+  const [blocos, setBlocos] = useState<Bloco[]>([{ tipo: 'texto', conteudo: '' }])
   const [loading, setLoading] = useState(isEdit)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [erro, setErro] = useState('')
   const [uploadingCapa, setUploadingCapa] = useState(false)
-  const [showImageModal, setShowImageModal] = useState(false)
-  const [imgLado, setImgLado] = useState<'left' | 'right'>('right')
-  const [imgLargura, setImgLargura] = useState('200px')
-  const [imgLegenda, setImgLegenda] = useState('')
-  const [uploadingModal, setUploadingModal] = useState(false)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const cursorRef = useRef<number>(0)
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null)
 
   useEffect(() => {
     if (!isEdit) return
@@ -74,9 +129,9 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
       .then(r => r.json())
       .then(d => {
         if (d.content) {
-          const { fm: parsedFm, content: parsedContent } = parseFrontmatter(d.content)
+          const { fm: parsedFm, content } = parseFrontmatter(d.content)
           setFm(parsedFm)
-          setContent(parsedContent)
+          setBlocos(mdxParaBlocos(content))
         }
         setLoading(false)
       })
@@ -84,80 +139,59 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
   }, [isEdit, slugProp])
 
   const gerarSlug = (title: string) =>
-    title.toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim().replace(/\s+/g, '-')
-
-  const handleTitle = (val: string) => {
-    setFm(f => ({ ...f, title: val }))
-    if (!isEdit) setSlug(gerarSlug(val))
-  }
+    title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-')
 
   async function uploadImagem(file: File): Promise<string | null> {
     const form = new FormData()
     form.append('file', file)
     const res = await fetch('/api/admin/upload', { method: 'POST', body: form })
     if (!res.ok) return null
-    const data = await res.json()
-    return data.url
+    return (await res.json()).url
   }
 
   async function handleCapaUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0]; if (!file) return
     setUploadingCapa(true)
     const url = await uploadImagem(file)
     if (url) setFm(f => ({ ...f, image: url }))
     setUploadingCapa(false)
   }
 
-  function inserirNoTexto(texto: string) {
-    const ta = textareaRef.current
-    if (!ta) return
-    const pos = cursorRef.current
-    const antes = content.slice(0, pos)
-    const depois = content.slice(pos)
-    const novoConteudo = antes + texto + depois
-    setContent(novoConteudo)
-    setTimeout(() => {
-      ta.focus()
-      ta.setSelectionRange(pos + texto.length, pos + texto.length)
-    }, 50)
-  }
-
-  function inserirFormatacao(antes: string, depois: string) {
-    const ta = textareaRef.current
-    if (!ta) return
-    const start = ta.selectionStart
-    const end = ta.selectionEnd
-    const selected = content.slice(start, end)
-    const novo = content.slice(0, start) + antes + selected + depois + content.slice(end)
-    setContent(novo)
-    setTimeout(() => {
-      ta.focus()
-      ta.setSelectionRange(start + antes.length, start + antes.length + selected.length)
-    }, 50)
-  }
-
-  async function handleModalUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploadingModal(true)
+  async function handleImagemFlutuante(idx: number, file: File) {
+    setUploadingIdx(idx)
     const url = await uploadImagem(file)
     if (url) {
-      const html = `\n<div style="float:${imgLado};margin:${imgLado === 'right' ? '0.5rem 0 1rem 1.5rem' : '0.5rem 1.5rem 1rem 0'};width:${imgLargura}">\n  <img src="${url}" alt="${imgLegenda}" style="width:100%;border-radius:4px" />\n  ${imgLegenda ? `<p style="font-size:0.75rem;color:#888;text-align:center;margin-top:0.25rem;font-style:italic">${imgLegenda}</p>` : ''}\n</div>\n`
-      inserirNoTexto(html)
-      setShowImageModal(false)
-      setImgLegenda('')
+      setBlocos(prev => prev.map((b, i) =>
+        i === idx && b.tipo === 'imagem-flutuante' ? { ...b, src: url } : b
+      ))
     }
-    setUploadingModal(false)
+    setUploadingIdx(null)
+  }
+
+  function addBloco(tipo: 'texto' | 'imagem-flutuante', aposIdx: number) {
+    const novo: Bloco = tipo === 'texto'
+      ? { tipo: 'texto', conteudo: '' }
+      : { tipo: 'imagem-flutuante', src: '', lado: 'right', largura: '220px', legenda: '', textoAoLado: '' }
+    setBlocos(prev => {
+      const next = [...prev]
+      next.splice(aposIdx + 1, 0, novo)
+      return next
+    })
+  }
+
+  function removeBloco(idx: number) {
+    setBlocos(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  function updateBloco(idx: number, partial: Partial<Bloco>) {
+    setBlocos(prev => prev.map((b, i) => i === idx ? { ...b, ...partial } as Bloco : b))
   }
 
   async function salvar() {
     if (!slug) return setErro('Título obrigatório.')
-    setSaving(true)
-    setErro('')
+    setSaving(true); setErro('')
+    const content = blocosParaMDX(blocos)
     const res = await fetch('/api/admin/salvar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -165,33 +199,18 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
     })
     setSaving(false)
     if (res.ok) {
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      setSaved(true); setTimeout(() => setSaved(false), 3000)
       if (!isEdit) router.push(`/admin/editar/${slug}`)
     } else {
-      const d = await res.json()
-      setErro(d.error || 'Erro ao salvar.')
+      setErro((await res.json()).error || 'Erro ao salvar.')
     }
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', fontFamily: 'Space Grotesk, sans-serif' }}>
+    <div style={{ ...s.page, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
       Carregando matéria...
     </div>
   )
-
-  const s: Record<string, React.CSSProperties> = {
-    page: { minHeight: '100vh', background: '#0a0a0a', fontFamily: 'Space Grotesk, sans-serif', color: '#f0ede6' },
-    header: { borderBottom: '1px solid #1e1e1e', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: '#0a0a0a', zIndex: 10 },
-    main: { maxWidth: '860px', margin: '0 auto', padding: '2rem' },
-    label: { display: 'block', color: '#888', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', marginBottom: '0.4rem' },
-    input: { width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '0.7rem 1rem', color: '#f0ede6', fontSize: '0.95rem', outline: 'none', fontFamily: 'Space Grotesk, sans-serif' },
-    select: { width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '0.7rem 1rem', color: '#f0ede6', fontSize: '0.95rem', outline: 'none', fontFamily: 'Space Grotesk, sans-serif' },
-    toolbar: { display: 'flex', gap: '0.4rem', flexWrap: 'wrap' as const, padding: '0.5rem', background: '#111', borderBottom: '1px solid #1e1e1e', borderRadius: '6px 6px 0 0' },
-    toolBtn: { background: 'transparent', border: '1px solid #1e1e1e', borderRadius: '4px', padding: '0.3rem 0.6rem', color: '#888', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'Space Grotesk, sans-serif' },
-    textarea: { width: '100%', minHeight: '400px', background: '#111', border: '1px solid #1e1e1e', borderTop: 'none', borderRadius: '0 0 6px 6px', padding: '1rem', color: '#f0ede6', fontSize: '0.95rem', lineHeight: '1.7', outline: 'none', resize: 'vertical' as const, fontFamily: 'Space Grotesk, sans-serif' },
-    saveBtn: { background: '#c8392b', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.6rem 1.5rem', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' },
-  }
 
   return (
     <div style={s.page}>
@@ -209,9 +228,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
             <a href={`/admin/preview?slug=${slugProp}`} target="_blank" style={{
               background: 'transparent', border: '1px solid #1e1e1e', borderRadius: '6px',
               padding: '0.6rem 1rem', color: '#888', fontSize: '0.875rem',
-            }}>
-              👁 Preview
-            </a>
+            }}>👁 Preview</a>
           )}
           <button onClick={salvar} disabled={saving} style={s.saveBtn}>
             {saving ? 'Salvando...' : 'Salvar matéria'}
@@ -220,20 +237,19 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
       </header>
 
       <main style={s.main}>
-        {/* Campos principais */}
+        {/* Metadados */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
           <div>
             <label style={s.label}>Título *</label>
             <input style={{ ...s.input, fontSize: '1.2rem', fontFamily: 'Playfair Display, serif' }}
-              value={fm.title} onChange={e => handleTitle(e.target.value)} placeholder="Título da matéria" />
+              value={fm.title} onChange={e => { setFm(f => ({ ...f, title: e.target.value })); if (!isEdit) setSlug(gerarSlug(e.target.value)) }}
+              placeholder="Título da matéria" />
             {slug && <div style={{ color: '#888', fontSize: '0.75rem', marginTop: '0.3rem' }}>Slug: {slug}</div>}
           </div>
-
           <div>
             <label style={s.label}>Subtítulo / Olho</label>
-            <input style={s.input} value={fm.subtitle} onChange={e => setFm(f => ({ ...f, subtitle: e.target.value }))} placeholder="Frase de abertura da matéria" />
+            <input style={s.input} value={fm.subtitle} onChange={e => setFm(f => ({ ...f, subtitle: e.target.value }))} placeholder="Frase de abertura" />
           </div>
-
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
               <label style={s.label}>Autor(a) *</label>
@@ -250,14 +266,10 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
               </select>
             </div>
           </div>
-
-          {/* Imagem de capa */}
           <div>
             <label style={s.label}>Imagem de capa</label>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-              {fm.image && (
-                <img src={fm.image} alt="capa" style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #1e1e1e' }} />
-              )}
+              {fm.image && <img src={fm.image} alt="capa" style={{ width: '120px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #1e1e1e' }} />}
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'inline-block', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '0.6rem 1rem', cursor: 'pointer', color: '#888', fontSize: '0.875rem' }}>
                   {uploadingCapa ? 'Enviando...' : fm.image ? 'Trocar imagem' : 'Escolher imagem'}
@@ -274,99 +286,110 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
           </div>
         </div>
 
-        {/* Editor de conteúdo */}
+        {/* Editor por blocos */}
         <div>
           <label style={s.label}>Conteúdo</label>
-          <div style={s.toolbar}>
-            <button style={s.toolBtn} onClick={() => inserirFormatacao('**', '**')} title="Negrito"><b>B</b></button>
-            <button style={s.toolBtn} onClick={() => inserirFormatacao('*', '*')} title="Itálico"><i>I</i></button>
-            <button style={s.toolBtn} onClick={() => inserirFormatacao('\n\n## ', '')} title="Título">H2</button>
-            <button style={s.toolBtn} onClick={() => inserirFormatacao('\n\n### ', '')} title="Subtítulo">H3</button>
-            <button style={s.toolBtn} onClick={() => inserirFormatacao('\n> ', '')} title="Citação">" "</button>
-            <button style={s.toolBtn} onClick={() => inserirFormatacao('\n- ', '')} title="Lista">• Lista</button>
-            <div style={{ width: '1px', background: '#1e1e1e', margin: '0 0.25rem' }} />
-            <button style={{ ...s.toolBtn, color: '#f0ede6' }} onClick={() => setShowImageModal(true)} title="Imagem no texto">
-              🖼 Imagem no texto
-            </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {blocos.map((bloco, idx) => (
+              <div key={idx}>
+                {bloco.tipo === 'texto' ? (
+                  <div style={s.blocoTexto}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <span style={{ color: '#888', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Texto</span>
+                      {blocos.length > 1 && (
+                        <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
+                      )}
+                    </div>
+                    <textarea
+                      style={{ ...s.input, minHeight: '120px', resize: 'vertical' as const, lineHeight: '1.7' }}
+                      value={bloco.conteudo}
+                      onChange={e => updateBloco(idx, { conteudo: e.target.value })}
+                      placeholder="Escreva o texto aqui..."
+                    />
+                  </div>
+                ) : (
+                  <div style={s.blocoImagem}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                      <span style={{ color: '#c8392b', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>🖼 Imagem com texto ao lado</span>
+                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                      {/* Coluna esquerda: imagem */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div>
+                          <label style={s.label}>Imagem</label>
+                          {bloco.src ? (
+                            <div style={{ position: 'relative' }}>
+                              <img src={bloco.src} alt="" style={{ width: '100%', borderRadius: '4px', maxHeight: '150px', objectFit: 'cover' }} />
+                              <label style={{ position: 'absolute', bottom: '0.5rem', right: '0.5rem', background: 'rgba(0,0,0,0.7)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', color: '#fff', fontSize: '0.75rem' }}>
+                                Trocar
+                                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files?.[0] && handleImagemFlutuante(idx, e.target.files[0])} />
+                              </label>
+                            </div>
+                          ) : (
+                            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px', background: '#0a0a0a', border: '1px dashed #444', borderRadius: '6px', cursor: 'pointer', color: '#888', fontSize: '0.875rem', flexDirection: 'column', gap: '0.5rem' }}>
+                              {uploadingIdx === idx ? 'Enviando...' : <>📁<span>Escolher imagem</span></>}
+                              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files?.[0] && handleImagemFlutuante(idx, e.target.files[0])} disabled={uploadingIdx === idx} />
+                            </label>
+                          )}
+                        </div>
+                        <div>
+                          <label style={s.label}>Legenda</label>
+                          <input style={s.input} value={bloco.legenda} onChange={e => updateBloco(idx, { legenda: e.target.value })} placeholder="Opcional" />
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <div style={{ flex: 1 }}>
+                            <label style={s.label}>Posição</label>
+                            <div style={{ display: 'flex', gap: '0.4rem' }}>
+                              {(['left', 'right'] as const).map(l => (
+                                <button key={l} onClick={() => updateBloco(idx, { lado: l })} style={{
+                                  flex: 1, padding: '0.5rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem',
+                                  background: bloco.lado === l ? '#c8392b' : '#0a0a0a',
+                                  border: `1px solid ${bloco.lado === l ? '#c8392b' : '#1e1e1e'}`,
+                                  color: bloco.lado === l ? '#fff' : '#888',
+                                  fontFamily: 'Space Grotesk, sans-serif',
+                                }}>
+                                  {l === 'left' ? '← Esq' : 'Dir →'}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <label style={s.label}>Tamanho</label>
+                            <select style={s.select} value={bloco.largura} onChange={e => updateBloco(idx, { largura: e.target.value })}>
+                              <option value="160px">Pequena</option>
+                              <option value="220px">Média</option>
+                              <option value="300px">Grande</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Coluna direita: texto ao lado */}
+                      <div>
+                        <label style={s.label}>Texto que fica ao lado da imagem</label>
+                        <textarea
+                          style={{ ...s.input, minHeight: '200px', resize: 'vertical' as const, lineHeight: '1.7' }}
+                          value={bloco.textoAoLado}
+                          onChange={e => updateBloco(idx, { textoAoLado: e.target.value })}
+                          placeholder="Este texto vai aparecer ao lado da imagem..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Botões para adicionar bloco após este */}
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', padding: '0.25rem 0' }}>
+                  <button style={s.addBtn} onClick={() => addBloco('texto', idx)}>+ Texto</button>
+                  <button style={s.addBtn} onClick={() => addBloco('imagem-flutuante', idx)}>+ Imagem com texto ao lado</button>
+                </div>
+              </div>
+            ))}
           </div>
-          <textarea
-            ref={textareaRef}
-            style={s.textarea}
-            value={content}
-            onChange={e => setContent(e.target.value)}
-            onMouseUp={e => { cursorRef.current = (e.target as HTMLTextAreaElement).selectionStart }}
-            onKeyUp={e => { cursorRef.current = (e.target as HTMLTextAreaElement).selectionStart }}
-            placeholder="Escreva o conteúdo da matéria aqui..."
-          />
         </div>
       </main>
-
-      {/* Modal imagem flutuante */}
-      {showImageModal && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-        }} onClick={() => setShowImageModal(false)}>
-          <div style={{
-            background: '#111', border: '1px solid #1e1e1e', borderRadius: '12px',
-            padding: '2rem', width: '100%', maxWidth: '440px',
-          }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ fontFamily: 'Playfair Display, serif', marginBottom: '1.5rem' }}>Inserir imagem no texto</h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={s.label}>Posição</label>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  {(['left', 'right'] as const).map(l => (
-                    <button key={l} onClick={() => setImgLado(l)} style={{
-                      flex: 1, padding: '0.6rem', borderRadius: '6px', cursor: 'pointer',
-                      background: imgLado === l ? '#c8392b' : '#0a0a0a',
-                      border: `1px solid ${imgLado === l ? '#c8392b' : '#1e1e1e'}`,
-                      color: imgLado === l ? '#fff' : '#888', fontSize: '0.875rem',
-                    }}>
-                      {l === 'left' ? '← Esquerda' : 'Direita →'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label style={s.label}>Largura</label>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  {[['160px', 'Pequena'], ['220px', 'Média'], ['300px', 'Grande']].map(([v, l]) => (
-                    <button key={v} onClick={() => setImgLargura(v)} style={{
-                      flex: 1, padding: '0.6rem', borderRadius: '6px', cursor: 'pointer',
-                      background: imgLargura === v ? '#c8392b' : '#0a0a0a',
-                      border: `1px solid ${imgLargura === v ? '#c8392b' : '#1e1e1e'}`,
-                      color: imgLargura === v ? '#fff' : '#888', fontSize: '0.8rem',
-                    }}>{l}</button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label style={s.label}>Legenda (opcional)</label>
-                <input style={s.input} value={imgLegenda} onChange={e => setImgLegenda(e.target.value)} placeholder="Descrição da imagem" />
-              </div>
-
-              <label style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: '#c8392b', color: '#fff', borderRadius: '6px',
-                padding: '0.75rem', cursor: uploadingModal ? 'not-allowed' : 'pointer',
-                opacity: uploadingModal ? 0.7 : 1, fontWeight: 600,
-              }}>
-                {uploadingModal ? 'Enviando imagem...' : '📁 Escolher e inserir imagem'}
-                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleModalUpload} disabled={uploadingModal} />
-              </label>
-
-              <button onClick={() => setShowImageModal(false)} style={{
-                background: 'transparent', border: '1px solid #1e1e1e', borderRadius: '6px',
-                padding: '0.6rem', color: '#888', cursor: 'pointer', fontSize: '0.875rem',
-              }}>Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
