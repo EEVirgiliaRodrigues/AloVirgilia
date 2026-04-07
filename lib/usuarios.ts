@@ -1,15 +1,16 @@
+// ============================================================
+// ADICIONE AQUI OS EMAILS QUE PODEM ACESSAR O PAINEL
+// Apenas contas Google com esses emails conseguem entrar
+// ============================================================
+
 export interface Usuario {
-  id: string
-  nome: string
   email: string
-  senha: string
+  nome: string
 }
 
 export const usuarios: Usuario[] = [
-  {
-    id: "1",
-    nome: "Gabriel",
-    email: "gabriel@escola.com",
-    senha: "$2a$10$.Y0ktdYaHvbP3cLEAV/q1uFZl3mwO0jtfCBMLpugj2dolS7Efg212",
-  },
+  { email: 'gabrielpetryla@gmail.com', nome: 'Gabriel' },
+  // Adicione mais emails aqui:
+  // { email: 'professor@escola.edu.br', nome: 'Professor Silva' },
+  // { email: 'aluno@escola.edu.br', nome: 'Aluno João' },
 ]
