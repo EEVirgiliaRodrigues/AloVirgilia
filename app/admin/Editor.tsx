@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import RichEditor from './RichEditor'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -386,34 +387,9 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                         <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
                       )}
                     </div>
-                    {/* Toolbar de formatação */}
-                    <div style={{ display: 'flex', gap: '0.3rem', marginBottom: '0.5rem', flexWrap: 'wrap' as const }}>
-                      {[
-                        { tipo: 'negrito', label: 'N', title: 'Negrito', style: { fontWeight: 'bold' as const } },
-                        { tipo: 'italico', label: 'I', title: 'Itálico', style: { fontStyle: 'italic' as const } },
-                        { tipo: 'h2', label: 'H2', title: 'Título' },
-                        { tipo: 'h3', label: 'H3', title: 'Subtítulo' },
-                        { tipo: 'citacao', label: '" "', title: 'Citação em destaque' },
-                        { tipo: 'lista', label: '• Lista', title: 'Lista' },
-                      ].map(btn => (
-                        <button
-                          key={btn.tipo}
-                          title={btn.title}
-                          onClick={() => aplicarFormatacao(idx, btn.tipo)}
-                          style={{
-                            ...s.toolBtn,
-                            ...btn.style,
-                          }}
-                        >
-                          {btn.label}
-                        </button>
-                      ))}
-                    </div>
-                    <textarea
-                      data-bloco={idx}
-                      style={{ ...s.input, minHeight: '120px', resize: 'vertical' as const, lineHeight: '1.7' }}
+                    <RichEditor
                       value={bloco.conteudo}
-                      onChange={e => updateBloco(idx, { conteudo: e.target.value })}
+                      onChange={val => updateBloco(idx, { conteudo: val })}
                       placeholder="Escreva o texto aqui..."
                     />
                   </div>
