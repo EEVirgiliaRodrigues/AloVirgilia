@@ -346,7 +346,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                       placeholder="Escreva o texto aqui..."
                     />
                   </div>
-                ) : (
+                ) : bloco.tipo === 'imagem-flutuante' ? (
                   <div style={s.blocoImagem}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                       <span style={{ color: '#c8392b', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>🖼 Imagem com texto ao lado</span>
@@ -417,7 +417,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                       </div>
                     </div>
                   </div>
-                )}
+                ) : null}
 
                 {/* Bloco video */}
                 {bloco.tipo === 'video' && (
