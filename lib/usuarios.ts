@@ -9,7 +9,7 @@ export interface Usuario {
 }
 
 export const usuarios: Usuario[] = [
-  { email: 'gabrielpetryla@gmail.com', nome: 'Gabriel' },
+  { email: 'gabrielmelnic@prof.educacao.sp.gov.br', nome: 'Gabriel' },
   // Adicione mais emails aqui:
   // { email: 'professor@escola.edu.br', nome: 'Professor Silva' },
   // { email: 'aluno@escola.edu.br', nome: 'Aluno João' },
