@@ -5,8 +5,8 @@ author: 'EE Virgília'
 date: 2026-03-22
 category: escola
 image: /uploads/mulher.png
-publicado: false
-destaque: false
+publicado: true
+destaque: true
 ---
 
 > "O homem não te define, sua casa não te define, você é o seu próprio lar"
