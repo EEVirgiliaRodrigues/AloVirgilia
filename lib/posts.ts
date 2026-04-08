@@ -71,8 +71,8 @@ function readPost(slug: string): Post | null {
       category: data.category || 'escola',
       image: data.image || '',
       image_caption: data.image_caption || '',
-      destaque: data.destaque || false,
-      publicado: data.publicado || false,
+      destaque: data.destaque === true || data.destaque === 'true',
+      publicado: data.publicado === true || data.publicado === 'true',
       content,
     }
   } catch {
