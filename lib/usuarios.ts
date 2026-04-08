@@ -28,12 +28,12 @@ export const usuarios: Usuario[] = [
   { email: '00001118142895sp@al.educacao.sp.gov.br', nome: 'Lara' },
   { email: '00001116940462sp@al.educacao.sp.gov.br', nome: 'Isadora' },
   { email: '00001140192498sp@al.educacao.sp.gov.br', nome: 'Samuel' },
-  { email: '00001118837836sp@al.educacao.sp.gov.br', nome: 'Davi Emannuel' }
-  { email: '00001118960828sp@al.educacao.sp.gov.br', nome: 'Iasmin' }
-  { email: '00001128555050sp@al.educacao.sp.gov.br', nome: 'Edson' }
-  { email: '00001115107872sp@al.educacao.sp.gov.br', nome: 'Vinicius' }
-  { email: '00001125539318sp@al.educacao.sp.gov.br', nome: 'Débora' }
-  { email: '00001125854479sp@al.educacao.sp.gov.br', nome: 'Jhonatan' }
+  { email: '00001118837836sp@al.educacao.sp.gov.br', nome: 'Davi Emannuel' },
+  { email: '00001118960828sp@al.educacao.sp.gov.br', nome: 'Iasmin' },
+  { email: '00001128555050sp@al.educacao.sp.gov.br', nome: 'Edson' },
+  { email: '00001115107872sp@al.educacao.sp.gov.br', nome: 'Vinicius' },
+  { email: '00001125539318sp@al.educacao.sp.gov.br', nome: 'Débora' },
+  { email: '00001125854479sp@al.educacao.sp.gov.br', nome: 'Jhonatan' },
   { email: '00001118131010sp@al.educacao.sp.gov.br', nome: 'João Paulo' }
   
   // Adicione mais emails aqui:
