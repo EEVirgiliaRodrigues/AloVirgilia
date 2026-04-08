@@ -6,7 +6,7 @@
   --border: #1e1e1e;
   --texto: #f0ede6;
   --muted: #888;
-  --muito-muted: #444;
+  --muito-muted: #888;
   --acento: #c8392b;
   --cat-escola: #4a9fd4;
   --cat-esportes: #3db87a;
@@ -55,13 +55,14 @@
 [data-theme="light"] .manchete-light .manchete-meta { color: #5a5550; }
 
 /* Header */
-[data-theme="light"] .header-top { color: var(--muted); border-color: var(--border); }
+[data-theme="light"] .header-top { color: #3a3530; border-color: var(--border); }
 [data-theme="light"] .header-brand-row { border-color: var(--border); }
+[data-theme="light"] .header-edition { color: #3a3530; }
 [data-theme="light"] .site-nav { border-color: var(--border); }
 [data-theme="light"] .site-nav a { color: #1a1816; }
 [data-theme="light"] .site-nav a:hover { color: var(--acento); }
 [data-theme="light"] .nav-link.ativo { color: var(--acento); border-color: var(--acento); }
-[data-theme="light"] .header-live { color: var(--muted); }
+[data-theme="light"] .header-live { color: #3a3530; }
 
 /* Ticker */
 [data-theme="light"] .ticker-wrap { background: var(--acento); }
