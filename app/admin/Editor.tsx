@@ -79,8 +79,7 @@ function blocosParaMDX(blocos: Bloco[]): string {
       const id = `galeria-${Math.random().toString(36).slice(2,7)}`
       const imgs = b.imagens.map((img, i) => 
         `<div class="galeria-slide" style="display:${i===0?'block':'none'}"><img src="${img.src}" alt="${img.legenda}" style="width:100%;height:320px;object-fit:cover;border-radius:6px" />${img.legenda ? `<p style="font-size:0.75rem;color:#888;text-align:center;margin-top:0.4rem;font-style:italic">${img.legenda}</p>` : ''}</div>`
-      ).join('
-')
+      ).join('\n')
       return `<div class="galeria-wrap" id="${id}" style="position:relative;margin:1.5rem 0">
 ${imgs}
   <button onclick="gPrev('${id}')" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);border:none;color:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem">‹</button>
