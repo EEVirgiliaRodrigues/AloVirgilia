@@ -19,6 +19,8 @@ type Bloco =
   | { tipo: 'texto'; conteudo: string }
   | { tipo: 'imagem-flutuante'; src: string; lado: 'left' | 'right'; largura: string; legenda: string; textoAoLado: string }
   | { tipo: 'video'; url: string; legenda: string }
+  | { tipo: 'imagem-simples'; src: string; legenda: string; alinhamento: 'left' | 'center' | 'right' | 'full' }
+  | { tipo: 'galeria'; imagens: { src: string; legenda: string }[] }
 
 const categorias = [
   { value: 'escola', label: 'Escola' },
@@ -63,6 +65,47 @@ function getYoutubeId(url: string): string | null {
 function blocosParaMDX(blocos: Bloco[]): string {
   return blocos.map(b => {
     if (b.tipo === 'texto') return b.conteudo
+    if (b.tipo === 'imagem-simples') {
+      if (!b.src) return ''
+      const align = b.alinhamento === 'full' ? '100%' : b.alinhamento === 'center' ? '70%' : '45%'
+      const margin = b.alinhamento === 'center' ? '1.5rem auto' : b.alinhamento === 'right' ? '1rem 0 1rem auto' : '1rem auto 1rem 0'
+      return `<figure style="width:${align};margin:${margin};display:block">
+  <img src="${b.src}" alt="${b.legenda}" style="width:100%;border-radius:6px;display:block" />
+  ${b.legenda ? `<figcaption style="font-size:0.75rem;color:#888;text-align:center;margin-top:0.4rem;font-style:italic">${b.legenda}</figcaption>` : ''}
+</figure>`
+    }
+    if (b.tipo === 'galeria') {
+      if (!b.imagens.length) return ''
+      const id = `galeria-${Math.random().toString(36).slice(2,7)}`
+      const imgs = b.imagens.map((img, i) => 
+        `<div class="galeria-slide" style="display:${i===0?'block':'none'}"><img src="${img.src}" alt="${img.legenda}" style="width:100%;height:320px;object-fit:cover;border-radius:6px" />${img.legenda ? `<p style="font-size:0.75rem;color:#888;text-align:center;margin-top:0.4rem;font-style:italic">${img.legenda}</p>` : ''}</div>`
+      ).join('
+')
+      return `<div class="galeria-wrap" id="${id}" style="position:relative;margin:1.5rem 0">
+${imgs}
+  <button onclick="gPrev('${id}')" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);border:none;color:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem">‹</button>
+  <button onclick="gNext('${id}')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);border:none;color:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem">›</button>
+  <div style="text-align:center;margin-top:0.5rem;font-size:0.75rem;color:#888" class="galeria-counter" id="${id}-count">1 / ${b.imagens.length}</div>
+</div>
+<script>
+(function(){
+  function gSlide(id, dir) {
+    var wrap = document.getElementById(id);
+    if (!wrap) return;
+    var slides = wrap.querySelectorAll('.galeria-slide');
+    var counter = document.getElementById(id + '-count');
+    var cur = 0;
+    slides.forEach(function(s, i) { if (s.style.display !== 'none') cur = i; });
+    slides[cur].style.display = 'none';
+    cur = (cur + dir + slides.length) % slides.length;
+    slides[cur].style.display = 'block';
+    if (counter) counter.textContent = (cur + 1) + ' / ' + slides.length;
+  }
+  window.gPrev = function(id) { gSlide(id, -1); };
+  window.gNext = function(id) { gSlide(id, 1); };
+})();
+</script>`
+    }
     if (b.tipo === 'video') {
       const id = getYoutubeId(b.url)
       if (!id) return b.legenda ? `*${b.legenda}*` : ''
@@ -208,11 +251,15 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
     setUploadingIdx(null)
   }
 
-  function addBloco(tipo: 'texto' | 'imagem-flutuante' | 'video', aposIdx: number) {
+  function addBloco(tipo: 'texto' | 'imagem-flutuante' | 'video' | 'imagem-simples' | 'galeria', aposIdx: number) {
     const novo: Bloco = tipo === 'texto'
       ? { tipo: 'texto', conteudo: '' }
       : tipo === 'video'
       ? { tipo: 'video', url: '', legenda: '' }
+      : tipo === 'imagem-simples'
+      ? { tipo: 'imagem-simples', src: '', legenda: '', alinhamento: 'full' as const }
+      : tipo === 'galeria'
+      ? { tipo: 'galeria', imagens: [] }
       : { tipo: 'imagem-flutuante', src: '', lado: 'right', largura: '220px', legenda: '', textoAoLado: '' }
     setBlocos(prev => {
       const next = [...prev]
@@ -497,10 +544,103 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                   </div>
                 )}
 
+                {/* Bloco imagem simples */}
+                {bloco.tipo === 'imagem-simples' && (
+                  <div style={{ ...s.blocoTexto, borderColor: '#3db87a' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                      <span style={{ color: '#3db87a', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>🖼 Imagem</span>
+                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '0.75rem' }}>
+                      {bloco.src ? (
+                        <div style={{ position: 'relative' }}>
+                          <img src={bloco.src} alt="" style={{ width: '100%', borderRadius: '6px', maxHeight: '200px', objectFit: 'cover' }} />
+                          <label style={{ position: 'absolute', bottom: '0.5rem', right: '0.5rem', background: 'rgba(0,0,0,0.7)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', color: '#fff', fontSize: '0.75rem' }}>
+                            Trocar
+                            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={async e => {
+                              const file = e.target.files?.[0]; if (!file) return
+                              const url = await uploadImagem(file)
+                              if (url) updateBloco(idx, { src: url })
+                            }} />
+                          </label>
+                        </div>
+                      ) : (
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px', background: '#0a0a0a', border: '1px dashed #444', borderRadius: '6px', cursor: 'pointer', color: '#888', fontSize: '0.875rem', flexDirection: 'column' as const, gap: '0.5rem' }}>
+                          📁 <span>Escolher imagem</span>
+                          <input type="file" accept="image/*" style={{ display: 'none' }} onChange={async e => {
+                            const file = e.target.files?.[0]; if (!file) return
+                            const url = await uploadImagem(file)
+                            if (url) updateBloco(idx, { src: url })
+                          }} />
+                        </label>
+                      )}
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {(['full', 'center', 'left', 'right'] as const).map(a => (
+                          <button key={a} onClick={() => updateBloco(idx, { alinhamento: a })} style={{
+                            flex: 1, padding: '0.4rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem',
+                            background: bloco.alinhamento === a ? '#3db87a' : '#0a0a0a',
+                            border: `1px solid ${bloco.alinhamento === a ? '#3db87a' : '#1e1e1e'}`,
+                            color: bloco.alinhamento === a ? '#fff' : '#888',
+                            fontFamily: 'Space Grotesk, sans-serif',
+                          }}>
+                            {a === 'full' ? 'Largura total' : a === 'center' ? 'Centro' : a === 'left' ? 'Esquerda' : 'Direita'}
+                          </button>
+                        ))}
+                      </div>
+                      <div>
+                        <label style={s.label}>Legenda (opcional)</label>
+                        <input style={s.input} value={bloco.legenda} onChange={e => updateBloco(idx, { legenda: e.target.value })} placeholder="Descrição da imagem" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bloco galeria / carrossel */}
+                {bloco.tipo === 'galeria' && (
+                  <div style={{ ...s.blocoTexto, borderColor: '#a870d4' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                      <span style={{ color: '#a870d4', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>🖼 Galeria / Carrossel</span>
+                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '0.75rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' as const }}>
+                        {bloco.imagens.map((img, imgIdx) => (
+                          <div key={imgIdx} style={{ position: 'relative', width: '100px', height: '100px' }}>
+                            <img src={img.src} alt={img.legenda} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
+                            <button onClick={() => {
+                              const novas = bloco.imagens.filter((_, i) => i !== imgIdx)
+                              updateBloco(idx, { imagens: novas })
+                            }} style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(200,57,43,0.9)', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', color: '#fff', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                          </div>
+                        ))}
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100px', height: '100px', background: '#0a0a0a', border: '1px dashed #444', borderRadius: '4px', cursor: 'pointer', color: '#888', fontSize: '0.75rem', flexDirection: 'column' as const, gap: '0.25rem' }}>
+                          + Foto
+                          <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={async e => {
+                            const files = Array.from(e.target.files || [])
+                            const novas = [...bloco.imagens]
+                            for (const file of files) {
+                              const url = await uploadImagem(file)
+                              if (url) novas.push({ src: url, legenda: '' })
+                            }
+                            updateBloco(idx, { imagens: novas })
+                          }} />
+                        </label>
+                      </div>
+                      {bloco.imagens.length > 0 && (
+                        <div style={{ color: '#888', fontSize: '0.8rem' }}>
+                          {bloco.imagens.length} foto{bloco.imagens.length > 1 ? 's' : ''} — no site as fotos passam com as setas ← →
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Botões para adicionar bloco após este */}
-                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', padding: '0.25rem 0' }}>
+                <div style={{ display: 'flex', gap: '0.3rem', justifyContent: 'center', padding: '0.25rem 0', flexWrap: 'wrap' as const }}>
                   <button style={s.addBtn} onClick={() => addBloco('texto', idx)}>+ Texto</button>
-                  <button style={s.addBtn} onClick={() => addBloco('imagem-flutuante', idx)}>+ Imagem com texto ao lado</button>
+                  <button style={s.addBtn} onClick={() => addBloco('imagem-flutuante', idx)}>+ Img com texto</button>
+                  <button style={s.addBtn} onClick={() => addBloco('imagem-simples', idx)}>+ Imagem</button>
+                  <button style={s.addBtn} onClick={() => addBloco('galeria', idx)}>+ Galeria</button>
                   <button style={s.addBtn} onClick={() => addBloco('video', idx)}>+ Vídeo</button>
                 </div>
               </div>
