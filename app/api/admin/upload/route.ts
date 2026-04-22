@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
 
   const formData = await req.formData()
   const file = formData.get('file') as File
+  const tipo = formData.get('tipo') as string || 'corpo'
   if (!file) return NextResponse.json({ error: 'Nenhum arquivo' }, { status: 400 })
 
   const token = process.env.GITHUB_TOKEN
@@ -35,8 +36,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 
-  // URL raw do GitHub — disponível imediatamente, sem precisar de deploy
-  const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/public/uploads/${filename}`
+  // Imagem de capa: usa caminho local (/uploads/) — disponível após deploy
+  // Imagens do corpo: usa URL raw do GitHub — disponível imediatamente no editor
+  const url = tipo === 'capa'
+    ? `/uploads/${filename}`
+    : `https://raw.githubusercontent.com/${owner}/${repo}/main/public/uploads/${filename}`
 
   return NextResponse.json({ url })
 }

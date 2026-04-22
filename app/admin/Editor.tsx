@@ -256,9 +256,10 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
     title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-')
 
-  async function uploadImagem(file: File): Promise<string | null> {
+  async function uploadImagem(file: File, tipo: string = 'corpo'): Promise<string | null> {
     const form = new FormData()
     form.append('file', file)
+    form.append('tipo', tipo)
     const res = await fetch('/api/admin/upload', { method: 'POST', body: form })
     if (!res.ok) return null
     return (await res.json()).url
@@ -267,7 +268,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
   async function handleCapaUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]; if (!file) return
     setUploadingCapa(true)
-    const url = await uploadImagem(file)
+    const url = await uploadImagem(file, 'capa')
     if (url) setFm(f => ({ ...f, image: url }))
     setUploadingCapa(false)
   }
