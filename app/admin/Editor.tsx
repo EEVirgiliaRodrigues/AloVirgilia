@@ -378,7 +378,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
             <a href={`/admin/preview?slug=${slugProp}`} target="_blank" style={{
               background: 'transparent', border: '1px solid #1e1e1e', borderRadius: '6px',
               padding: '0.6rem 1rem', color: '#888', fontSize: '0.875rem',
-            }}>ðŸ‘ Preview</a>
+            }}>◎ Preview</a>
           )}
           <button onClick={salvar} disabled={saving} style={s.saveBtn}>
             {saving ? 'Salvando...' : 'Salvar matéria'}
@@ -468,7 +468,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                             </div>
                           ) : (
                             <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px', background: '#0a0a0a', border: '1px dashed #444', borderRadius: '6px', cursor: 'pointer', color: '#888', fontSize: '0.875rem', flexDirection: 'column', gap: '0.5rem' }}>
-                              {uploadingIdx === idx ? 'Enviando...' : <><span>ðŸ“</span><span>Escolher imagem</span></>}
+                              {uploadingIdx === idx ? 'Enviando...' : <><span>📁</span><span>Escolher imagem</span></>}
                               <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files?.[0] && handleImagemFlutuante(idx, e.target.files[0])} disabled={uploadingIdx === idx} />
                             </label>
                           )}
@@ -517,7 +517,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                 {bloco.tipo === 'video' && (
                   <div style={{ ...s.blocoTexto, borderColor: '#4a9fd4' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                      <span style={{ color: '#4a9fd4', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>ðŸ“¹ Vídeo do YouTube</span>
+                      <span style={{ color: '#4a9fd4', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>▶ Vídeo do YouTube</span>
                       <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '0.75rem' }}>
@@ -560,7 +560,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                         </div>
                       ) : (
                         <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px', background: '#0a0a0a', border: '1px dashed #444', borderRadius: '6px', cursor: 'pointer', color: '#888', fontSize: '0.875rem', flexDirection: 'column' as const, gap: '0.5rem' }}>
-                          <span>ðŸ“</span><span>Escolher imagem</span>
+                          <span>📁</span><span>Escolher imagem</span>
                           <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) handleImagemSimples(idx, f) }} />
                         </label>
                       )}
