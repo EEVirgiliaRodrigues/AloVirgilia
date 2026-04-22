@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import RichEditor from './RichEditor'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -14,7 +14,6 @@ interface Frontmatter {
   image_caption: string
 }
 
-// Bloco de conteúdo — texto puro ou imagem flutuante
 type Bloco =
   | { tipo: 'texto'; conteudo: string }
   | { tipo: 'imagem-flutuante'; src: string; lado: 'left' | 'right'; largura: string; legenda: string; textoAoLado: string }
@@ -55,13 +54,11 @@ function parseFrontmatter(raw: string): { fm: Frontmatter; content: string } {
   }
 }
 
-// Extrai ID do YouTube de qualquer formato de URL
 function getYoutubeId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/)
   return m ? m[1] : null
 }
 
-// Converte blocos para MDX final
 function blocosParaMDX(blocos: Bloco[]): string {
   return blocos.map(b => {
     if (b.tipo === 'texto') return b.conteudo
@@ -76,14 +73,14 @@ function blocosParaMDX(blocos: Bloco[]): string {
     }
     if (b.tipo === 'galeria') {
       if (!b.imagens.length) return ''
-      const id = `galeria-${Math.random().toString(36).slice(2,7)}`
-      const imgs = b.imagens.map((img, i) => 
-        `<div class="galeria-slide" style="display:${i===0?'block':'none'}"><img src="${img.src}" alt="${img.legenda}" style="width:100%;height:320px;object-fit:cover;border-radius:6px" />${img.legenda ? `<p style="font-size:0.75rem;color:#888;text-align:center;margin-top:0.4rem;font-style:italic">${img.legenda}</p>` : ''}</div>`
+      const id = `galeria-${Math.random().toString(36).slice(2, 7)}`
+      const imgs = b.imagens.map((img, i) =>
+        `<div class="galeria-slide" style="display:${i === 0 ? 'block' : 'none'}"><img src="${img.src}" alt="${img.legenda}" style="width:100%;height:320px;object-fit:cover;border-radius:6px" />${img.legenda ? `<p style="font-size:0.75rem;color:#888;text-align:center;margin-top:0.4rem;font-style:italic">${img.legenda}</p>` : ''}</div>`
       ).join('\n')
       return `<div class="galeria-wrap" id="${id}" style="position:relative;margin:1.5rem 0">
 ${imgs}
-  <button onclick="gPrev('${id}')" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);border:none;color:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem">‹</button>
-  <button onclick="gNext('${id}')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);border:none;color:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem">›</button>
+  <button onclick="gPrev('${id}')" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);border:none;color:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem">&#8249;</button>
+  <button onclick="gNext('${id}')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.5);border:none;color:#fff;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem">&#8250;</button>
   <div style="text-align:center;margin-top:0.5rem;font-size:0.75rem;color:#888" class="galeria-counter" id="${id}-count">1 / ${b.imagens.length}</div>
 </div>
 <script>
@@ -110,8 +107,7 @@ ${imgs}
       if (!id) return b.legenda ? `*${b.legenda}*` : ''
       return `<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;margin:1.5rem 0;border-radius:8px">
   <iframe src="https://www.youtube.com/embed/${id}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen loading="lazy"></iframe>
-</div>${b.legenda ? `
-*${b.legenda}*` : ''}`
+</div>${b.legenda ? `\n*${b.legenda}*` : ''}`
     }
     const margin = b.lado === 'right' ? '0.5rem 0 1rem 1.5rem' : '0.5rem 1.5rem 1rem 0'
     return `<div style="float:${b.lado};margin:${margin};width:${b.largura}">
@@ -123,16 +119,13 @@ ${b.textoAoLado}
   }).join('\n\n')
 }
 
-// Converte MDX existente em blocos
 function mdxParaBlocos(content: string): Bloco[] {
   if (!content.trim()) return [{ tipo: 'texto', conteudo: '' }]
-  // Tenta detectar blocos de imagem flutuante existentes
   const regex = /<div style="float:(left|right);[^"]*width:([^"]+)">\s*<img src="([^"]*)"[^>]*\/>\s*(?:<p[^>]*>([^<]*)<\/p>)?\s*<\/div>\n?([\s\S]*?)<div style="clear:both"><\/div>/g
   let resultado: Bloco[] = []
   let lastIndex = 0
   let match
   while ((match = regex.exec(content)) !== null) {
-    // Texto antes
     const antes = content.slice(lastIndex, match.index).trim()
     if (antes) resultado.push({ tipo: 'texto', conteudo: antes })
     resultado.push({
@@ -147,7 +140,6 @@ function mdxParaBlocos(content: string): Bloco[] {
   }
   const resto = content.slice(lastIndex).trim()
   if (resto) resultado.push({ tipo: 'texto', conteudo: resto })
-  // Detectar blocos de video
   const videoRegex = /<div style="position:relative;padding-bottom:56\.25%[^>]*>[\s\S]*?<\/div>(?:\n\*([^*]*)\*)?/g
   let resultado2: Bloco[] = []
   let lastIndex2 = 0
@@ -181,7 +173,6 @@ const s: Record<string, React.CSSProperties> = {
   input: { width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '0.7rem 1rem', color: '#f0ede6', fontSize: '0.95rem', outline: 'none', fontFamily: 'Space Grotesk, sans-serif' },
   select: { width: '100%', background: '#111', border: '1px solid #1e1e1e', borderRadius: '6px', padding: '0.7rem 1rem', color: '#f0ede6', fontSize: '0.95rem', outline: 'none', fontFamily: 'Space Grotesk, sans-serif' },
   saveBtn: { background: '#c8392b', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.6rem 1.5rem', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' },
-  toolBtn: { background: '#0a0a0a', border: '1px solid #1e1e1e', borderRadius: '4px', padding: '0.3rem 0.6rem', color: '#888', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'Space Grotesk, sans-serif' },
   blocoTexto: { background: '#111', border: '1px solid #1e1e1e', borderRadius: '8px', padding: '1rem', marginBottom: '0.5rem' },
   blocoImagem: { background: '#111', border: '2px solid #c8392b', borderRadius: '8px', padding: '1.25rem', marginBottom: '0.5rem' },
   addBtn: { background: 'transparent', border: '1px dashed #444', borderRadius: '6px', padding: '0.6rem 1rem', color: '#888', cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'Space Grotesk, sans-serif' },
@@ -250,6 +241,36 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
     setUploadingIdx(null)
   }
 
+  // Upload imagem simples — usa setBlocos diretamente para garantir re-render
+  async function handleImagemSimples(idx: number, file: File) {
+    setUploadingIdx(idx)
+    const url = await uploadImagem(file)
+    if (url) {
+      setBlocos(prev => prev.map((b, i) => {
+        if (i !== idx || b.tipo !== 'imagem-simples') return b
+        return { ...b, src: url }
+      }))
+    }
+    setUploadingIdx(null)
+  }
+
+  // Upload galeria — usa setBlocos diretamente
+  async function handleGaleriaUpload(idx: number, files: File[]) {
+    setUploadingIdx(idx)
+    const novasUrls: string[] = []
+    for (const file of files) {
+      const url = await uploadImagem(file)
+      if (url) novasUrls.push(url)
+    }
+    if (novasUrls.length > 0) {
+      setBlocos(prev => prev.map((b, i) => {
+        if (i !== idx || b.tipo !== 'galeria') return b
+        return { ...b, imagens: [...b.imagens, ...novasUrls.map(src => ({ src, legenda: '' }))] }
+      }))
+    }
+    setUploadingIdx(null)
+  }
+
   function addBloco(tipo: 'texto' | 'imagem-flutuante' | 'video' | 'imagem-simples' | 'galeria', aposIdx: number) {
     const novo: Bloco = tipo === 'texto'
       ? { tipo: 'texto', conteudo: '' }
@@ -293,52 +314,6 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
     }
   }
 
-  // Aplica formatação no textarea do bloco de texto
-  function aplicarFormatacao(idx: number, tipo: string) {
-    const ta = document.querySelector(`[data-bloco="${idx}"]`) as HTMLTextAreaElement
-    if (!ta) return
-    const start = ta.selectionStart
-    const end = ta.selectionEnd
-    const bloco = blocos[idx]
-    if (bloco.tipo !== 'texto') return
-    const texto = bloco.conteudo
-    const selecionado = texto.slice(start, end)
-
-    let novo = texto
-    let cursorStart = start
-    let cursorEnd = end
-
-    if (tipo === 'negrito') {
-      novo = texto.slice(0, start) + `**${selecionado}**` + texto.slice(end)
-      cursorStart = start + 2; cursorEnd = end + 2
-    } else if (tipo === 'italico') {
-      novo = texto.slice(0, start) + `*${selecionado}*` + texto.slice(end)
-      cursorStart = start + 1; cursorEnd = end + 1
-    } else if (tipo === 'h2') {
-      const lineStart = texto.lastIndexOf('\n', start - 1) + 1
-      novo = texto.slice(0, lineStart) + '## ' + texto.slice(lineStart)
-      cursorStart = start + 3; cursorEnd = end + 3
-    } else if (tipo === 'h3') {
-      const lineStart = texto.lastIndexOf('\n', start - 1) + 1
-      novo = texto.slice(0, lineStart) + '### ' + texto.slice(lineStart)
-      cursorStart = start + 4; cursorEnd = end + 4
-    } else if (tipo === 'citacao') {
-      const lineStart = texto.lastIndexOf('\n', start - 1) + 1
-      novo = texto.slice(0, lineStart) + '> ' + texto.slice(lineStart)
-      cursorStart = start + 2; cursorEnd = end + 2
-    } else if (tipo === 'lista') {
-      const lineStart = texto.lastIndexOf('\n', start - 1) + 1
-      novo = texto.slice(0, lineStart) + '- ' + texto.slice(lineStart)
-      cursorStart = start + 2; cursorEnd = end + 2
-    }
-
-    updateBloco(idx, { conteudo: novo })
-    setTimeout(() => {
-      ta.focus()
-      ta.setSelectionRange(cursorStart, cursorEnd)
-    }, 10)
-  }
-
   if (loading) return (
     <div style={{ ...s.page, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
       Carregando matéria...
@@ -370,7 +345,6 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
       </header>
 
       <main style={s.main}>
-        {/* Metadados */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
           <div>
             <label style={s.label}>Título *</label>
@@ -419,7 +393,6 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
           </div>
         </div>
 
-        {/* Editor por blocos */}
         <div>
           <label style={s.label}>Conteúdo</label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -429,15 +402,9 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                   <div style={s.blocoTexto}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                       <span style={{ color: '#888', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Texto</span>
-                      {blocos.length > 1 && (
-                        <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
-                      )}
+                      {blocos.length > 1 && <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>}
                     </div>
-                    <RichEditor
-                      value={bloco.conteudo}
-                      onChange={val => updateBloco(idx, { conteudo: val })}
-                      placeholder="Escreva o texto aqui..."
-                    />
+                    <RichEditor value={bloco.conteudo} onChange={val => updateBloco(idx, { conteudo: val })} placeholder="Escreva o texto aqui..." />
                   </div>
                 ) : bloco.tipo === 'imagem-flutuante' ? (
                   <div style={s.blocoImagem}>
@@ -445,9 +412,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                       <span style={{ color: '#c8392b', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>🖼 Imagem com texto ao lado</span>
                       <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
                     </div>
-
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                      {/* Coluna esquerda: imagem */}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         <div>
                           <label style={s.label}>Imagem</label>
@@ -461,7 +426,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                             </div>
                           ) : (
                             <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100px', background: '#0a0a0a', border: '1px dashed #444', borderRadius: '6px', cursor: 'pointer', color: '#888', fontSize: '0.875rem', flexDirection: 'column', gap: '0.5rem' }}>
-                              {uploadingIdx === idx ? 'Enviando...' : <>📁<span>Escolher imagem</span></>}
+                              {uploadingIdx === idx ? 'Enviando...' : <><span>📁</span><span>Escolher imagem</span></>}
                               <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files?.[0] && handleImagemFlutuante(idx, e.target.files[0])} disabled={uploadingIdx === idx} />
                             </label>
                           )}
@@ -497,22 +462,16 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                           </div>
                         </div>
                       </div>
-
-                      {/* Coluna direita: texto ao lado */}
                       <div>
                         <label style={s.label}>Texto que fica ao lado da imagem</label>
-                        <textarea
-                          style={{ ...s.input, minHeight: '200px', resize: 'vertical' as const, lineHeight: '1.7' }}
-                          value={bloco.textoAoLado}
-                          onChange={e => updateBloco(idx, { textoAoLado: e.target.value })}
-                          placeholder="Este texto vai aparecer ao lado da imagem..."
-                        />
+                        <textarea style={{ ...s.input, minHeight: '200px', resize: 'vertical' as const, lineHeight: '1.7' }}
+                          value={bloco.textoAoLado} onChange={e => updateBloco(idx, { textoAoLado: e.target.value })}
+                          placeholder="Este texto vai aparecer ao lado da imagem..." />
                       </div>
                     </div>
                   </div>
                 ) : null}
 
-                {/* Bloco video */}
                 {bloco.tipo === 'video' && (
                   <div style={{ ...s.blocoTexto, borderColor: '#4a9fd4' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -522,28 +481,22 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                     <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '0.75rem' }}>
                       <div>
                         <label style={s.label}>Link do YouTube</label>
-                        <input style={s.input} value={bloco.url}
-                          onChange={e => updateBloco(idx, { url: e.target.value })}
-                          placeholder="https://www.youtube.com/watch?v=..." />
+                        <input style={s.input} value={bloco.url} onChange={e => updateBloco(idx, { url: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." />
                       </div>
                       {bloco.url && getYoutubeId(bloco.url) && (
                         <div style={{ position: 'relative', paddingBottom: '30%', height: 0, overflow: 'hidden', borderRadius: '6px', maxWidth: '400px' }}>
                           <iframe src={`https://www.youtube.com/embed/${getYoutubeId(bloco.url)}`}
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
-                            allowFullScreen />
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }} allowFullScreen />
                         </div>
                       )}
                       <div>
                         <label style={s.label}>Legenda (opcional)</label>
-                        <input style={s.input} value={bloco.legenda}
-                          onChange={e => updateBloco(idx, { legenda: e.target.value })}
-                          placeholder="Descrição do vídeo" />
+                        <input style={s.input} value={bloco.legenda} onChange={e => updateBloco(idx, { legenda: e.target.value })} placeholder="Descrição do vídeo" />
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Bloco imagem simples */}
                 {bloco.tipo === 'imagem-simples' && (
                   <div style={{ ...s.blocoTexto, borderColor: '#3db87a' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -551,26 +504,22 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                       <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '0.75rem' }}>
-                      {bloco.src ? (
+                      {uploadingIdx === idx ? (
+                        <div style={{ height: '120px', background: '#0a0a0a', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
+                          Enviando imagem...
+                        </div>
+                      ) : bloco.src ? (
                         <div style={{ position: 'relative' }}>
                           <img src={bloco.src} alt="" style={{ width: '100%', borderRadius: '6px', maxHeight: '200px', objectFit: 'cover' }} />
                           <label style={{ position: 'absolute', bottom: '0.5rem', right: '0.5rem', background: 'rgba(0,0,0,0.7)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', color: '#fff', fontSize: '0.75rem' }}>
                             Trocar
-                            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={async e => {
-                              const file = e.target.files?.[0]; if (!file) return
-                              const url = await uploadImagem(file)
-                              if (url) updateBloco(idx, { src: url })
-                            }} />
+                            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) handleImagemSimples(idx, f) }} />
                           </label>
                         </div>
                       ) : (
                         <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '120px', background: '#0a0a0a', border: '1px dashed #444', borderRadius: '6px', cursor: 'pointer', color: '#888', fontSize: '0.875rem', flexDirection: 'column' as const, gap: '0.5rem' }}>
-                          📁 <span>Escolher imagem</span>
-                          <input type="file" accept="image/*" style={{ display: 'none' }} onChange={async e => {
-                            const file = e.target.files?.[0]; if (!file) return
-                            const url = await uploadImagem(file)
-                            if (url) updateBloco(idx, { src: url })
-                          }} />
+                          <span>📁</span><span>Escolher imagem</span>
+                          <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) handleImagemSimples(idx, f) }} />
                         </label>
                       )}
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -582,7 +531,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                             color: bloco.alinhamento === a ? '#fff' : '#888',
                             fontFamily: 'Space Grotesk, sans-serif',
                           }}>
-                            {a === 'full' ? 'Largura total' : a === 'center' ? 'Centro' : a === 'left' ? 'Esquerda' : 'Direita'}
+                            {a === 'full' ? 'Total' : a === 'center' ? 'Centro' : a === 'left' ? 'Esq' : 'Dir'}
                           </button>
                         ))}
                       </div>
@@ -594,7 +543,6 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                   </div>
                 )}
 
-                {/* Bloco galeria / carrossel */}
                 {bloco.tipo === 'galeria' && (
                   <div style={{ ...s.blocoTexto, borderColor: '#a870d4' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -607,34 +555,28 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                           <div key={imgIdx} style={{ position: 'relative', width: '100px', height: '100px' }}>
                             <img src={img.src} alt={img.legenda} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
                             <button onClick={() => {
-                              const novas = bloco.imagens.filter((_, i) => i !== imgIdx)
-                              updateBloco(idx, { imagens: novas })
+                              setBlocos(prev => prev.map((b, i) => {
+                                if (i !== idx || b.tipo !== 'galeria') return b
+                                return { ...b, imagens: b.imagens.filter((_, j) => j !== imgIdx) }
+                              }))
                             }} style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(200,57,43,0.9)', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', color: '#fff', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
                           </div>
                         ))}
-                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100px', height: '100px', background: '#0a0a0a', border: '1px dashed #444', borderRadius: '4px', cursor: 'pointer', color: '#888', fontSize: '0.75rem', flexDirection: 'column' as const, gap: '0.25rem' }}>
-                          + Foto
-                          <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={async e => {
-                            const files = Array.from(e.target.files || [])
-                            const novas = [...bloco.imagens]
-                            for (const file of files) {
-                              const url = await uploadImagem(file)
-                              if (url) novas.push({ src: url, legenda: '' })
-                            }
-                            updateBloco(idx, { imagens: novas })
-                          }} />
+                        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100px', height: '100px', background: uploadingIdx === idx ? '#111' : '#0a0a0a', border: '1px dashed #444', borderRadius: '4px', cursor: 'pointer', color: '#888', fontSize: '0.75rem', flexDirection: 'column' as const, gap: '0.25rem' }}>
+                          {uploadingIdx === idx ? 'Enviando...' : '+ Foto'}
+                          <input type="file" accept="image/*" multiple style={{ display: 'none' }} disabled={uploadingIdx === idx}
+                            onChange={e => { const files = Array.from(e.target.files || []); if (files.length) handleGaleriaUpload(idx, files) }} />
                         </label>
                       </div>
                       {bloco.imagens.length > 0 && (
                         <div style={{ color: '#888', fontSize: '0.8rem' }}>
-                          {bloco.imagens.length} foto{bloco.imagens.length > 1 ? 's' : ''} — no site as fotos passam com as setas ← →
+                          {bloco.imagens.length} foto{bloco.imagens.length > 1 ? 's' : ''} — no site as fotos passam com setas ← →
                         </div>
                       )}
                     </div>
                   </div>
                 )}
 
-                {/* Botões para adicionar bloco após este */}
                 <div style={{ display: 'flex', gap: '0.3rem', justifyContent: 'center', padding: '0.25rem 0', flexWrap: 'wrap' as const }}>
                   <button style={s.addBtn} onClick={() => addBloco('texto', idx)}>+ Texto</button>
                   <button style={s.addBtn} onClick={() => addBloco('imagem-flutuante', idx)}>+ Img com texto</button>
