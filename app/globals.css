@@ -83,7 +83,7 @@
 
 /* Post */
 [data-theme="light"] .post-body { color: #1a1816; }
-[data-theme="light"] .post-body p { color: #2a2520; }
+[data-theme="light"] .post-body p { color: #2a2520; text-align: justify; }
 [data-theme="light"] .post-body h2 { color: #1a1816; border-color: var(--border); }
 [data-theme="light"] .post-body h3 { color: #1a1816; }
 [data-theme="light"] .post-body blockquote { color: #2a2520; border-color: var(--acento); }
@@ -232,7 +232,7 @@ img { max-width: 100%; display: block; }
 .post-cover img { width: 100%; max-height: 480px; object-fit: cover; }
 .post-cover figcaption { font-size: 11px; color: var(--muito-muted); font-style: italic; margin-top: 6px; font-family: var(--fonte-mono); }
 .post-body { font-size: 1.05rem; line-height: 1.8; color: #d0cdc6; }
-.post-body p { margin-bottom: 1.5rem; }
+.post-body p { margin-bottom: 1.5rem; text-align: justify; }
 .post-body h2 { font-family: var(--fonte-titulo); font-size: 1.5rem; font-weight: 700; color: var(--texto); margin: 2rem 0 0.75rem; border-top: 1px solid var(--border); padding-top: 1.25rem; }
 .post-body h3 { font-family: var(--fonte-titulo); font-size: 1.2rem; font-weight: 700; color: var(--texto); margin: 1.5rem 0 0.5rem; }
 .post-body blockquote { border-left: 3px solid var(--acento); margin: 2rem 0; padding: 0.5rem 0 0.5rem 1.5rem; font-family: var(--fonte-titulo); font-style: italic; font-size: 1.3rem; color: var(--texto); }

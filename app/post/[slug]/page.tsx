@@ -9,6 +9,7 @@ import Footer from '@/components/Footer'
 import ShareButton from '@/components/ShareButton'
 import { getAllPosts, getPostBySlug, formatDate, readingTime } from '@/lib/posts'
 import ReadingProgress from '@/components/ReadingProgress'
+import GaleriaCarrossel from '@/components/GaleriaCarrossel'
 
 export async function generateStaticParams() {
   const posts = getAllPosts()
@@ -32,16 +33,39 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
+function parseConteudo(content: string) {
+  const partes: { tipo: 'mdx' | 'galeria'; conteudo: string; slides?: { src: string; legenda: string }[] }[] = []
+  const galeriaRegex = /<div class="galeria-wrap"[^>]*>([\s\S]*?)<\/div>\n<script>[\s\S]*?<\/script>/g
+  let lastIndex = 0
+  let match
+
+  while ((match = galeriaRegex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      const antes = content.slice(lastIndex, match.index).replace(/<script>[\s\S]*?<\/script>/g, '')
+      if (antes.trim()) partes.push({ tipo: 'mdx', conteudo: antes })
+    }
+    const slides: { src: string; legenda: string }[] = []
+    const slideRegex = /<img src="([^"]*)"[^>]*\/>(?:[\s\S]*?<p[^>]*>([^<]*)<\/p>)?/g
+    let sm
+    while ((sm = slideRegex.exec(match[1])) !== null) {
+      slides.push({ src: sm[1], legenda: sm[2] || '' })
+    }
+    partes.push({ tipo: 'galeria', conteudo: '', slides })
+    lastIndex = match.index + match[0].length
+  }
+
+  const resto = content.slice(lastIndex).replace(/<script>[\s\S]*?<\/script>/g, '')
+  if (resto.trim()) partes.push({ tipo: 'mdx', conteudo: resto })
+  return partes.length > 0 ? partes : [{ tipo: 'mdx' as const, conteudo: content }]
+}
+
 export default function PostPage({ params }: { params: { slug: string } }) {
   const post = getPostBySlug(params.slug)
   const allPosts = getAllPosts()
-
   if (!post) notFound()
-
   const minutos = readingTime(post.content)
-  const relacionados = allPosts
-    .filter(p => p.category === post.category && p.slug !== post.slug)
-    .slice(0, 3)
+  const relacionados = allPosts.filter(p => p.category === post.category && p.slug !== post.slug).slice(0, 3)
+  const partes = parseConteudo(post.content)
 
   return (
     <>
@@ -51,9 +75,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
         <article className="post-full">
           <header className="post-header">
             <div className="post-meta-top">
-              <span className={`post-category cat-${post.category}`}>
-                {post.category.toUpperCase()}
-              </span>
+              <span className={`post-category cat-${post.category}`}>{post.category.toUpperCase()}</span>
               <span className="post-date">{formatDate(post.date)}</span>
               <span className="post-leitura">{minutos} min de leitura</span>
             </div>
@@ -69,9 +91,15 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           </header>
 
           <div className="post-body">
-            <ReactMarkdown rehypePlugins={[rehypeRaw]}>
-              {post.content}
-            </ReactMarkdown>
+            {partes.map((parte, i) =>
+              parte.tipo === 'galeria' ? (
+                <GaleriaCarrossel key={i} slides={parte.slides!} />
+              ) : (
+                <ReactMarkdown key={i} rehypePlugins={[rehypeRaw]}>
+                  {parte.conteudo}
+                </ReactMarkdown>
+              )
+            )}
           </div>
 
           <footer className="post-footer">
@@ -91,19 +119,13 @@ export default function PostPage({ params }: { params: { slug: string } }) {
                 {relacionados.map((p, i) => (
                   <article key={p.slug} className="gcard" style={{ '--anim-delay': `${i * 0.1}s` } as React.CSSProperties}>
                     {p.image ? (
-                      <div className="gcard-img">
-                        <img src={p.image} alt={p.title} />
-                      </div>
+                      <div className="gcard-img"><img src={p.image} alt={p.title} /></div>
                     ) : (
                       <div className={`gcard-img-placeholder cat-${p.category}-bg`} />
                     )}
                     <div className="gcard-num">{String(i + 1).padStart(2, '0')}</div>
-                    <span className={`gcard-cat cat-${p.category}`}>
-                      {p.category.toUpperCase()}
-                    </span>
-                    <h2 className="gcard-titulo">
-                      <Link href={`/post/${p.slug}`}>{p.title}</Link>
-                    </h2>
+                    <span className={`gcard-cat cat-${p.category}`}>{p.category.toUpperCase()}</span>
+                    <h2 className="gcard-titulo"><Link href={`/post/${p.slug}`}>{p.title}</Link></h2>
                     <div className="gcard-meta">{p.author} · {formatDate(p.date)}</div>
                   </article>
                 ))}
