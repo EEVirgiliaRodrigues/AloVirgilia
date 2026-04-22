@@ -20,18 +20,28 @@ export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
 
   return (
     <div style={{ position: 'relative', margin: '1.5rem 0', borderRadius: '8px', overflow: 'hidden' }}>
+      <style>{`
+        .galeria-img {
+          width: 100%;
+          height: auto;
+          max-height: 480px;
+          object-fit: contain;
+          display: block;
+          border-radius: 6px;
+          background: #111;
+        }
+        @media (max-width: 600px) {
+          .galeria-img {
+            height: 280px;
+            object-fit: cover;
+            max-height: none;
+          }
+        }
+      `}</style>
       <img
         src={slides[atual].src}
         alt={slides[atual].legenda}
-        style={{
-          width: '100%',
-          height: 'auto',
-          maxHeight: '480px',
-          objectFit: 'contain',
-          display: 'block',
-          borderRadius: '6px',
-          background: '#111',
-        }}
+        className="galeria-img"
       />
       {slides[atual].legenda && (
         <p style={{ fontSize: '0.75rem', color: '#888', textAlign: 'center', marginTop: '0.4rem', fontStyle: 'italic' }}>
