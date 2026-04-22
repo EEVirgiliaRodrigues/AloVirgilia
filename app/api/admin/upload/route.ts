@@ -35,5 +35,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 
-  return NextResponse.json({ url: `/uploads/${filename}` })
+  // URL raw do GitHub — disponível imediatamente, sem precisar de deploy
+  const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/public/uploads/${filename}`
+
+  return NextResponse.json({ url })
 }
