@@ -121,48 +121,95 @@ ${b.textoAoLado}
 
 function mdxParaBlocos(content: string): Bloco[] {
   if (!content.trim()) return [{ tipo: 'texto', conteudo: '' }]
-  const regex = /<div style="float:(left|right);[^"]*width:([^"]+)">\s*<img src="([^"]*)"[^>]*\/>\s*(?:<p[^>]*>([^<]*)<\/p>)?\s*<\/div>\n?([\s\S]*?)<div style="clear:both"><\/div>/g
-  let resultado: Bloco[] = []
-  let lastIndex = 0
-  let match
-  while ((match = regex.exec(content)) !== null) {
-    const antes = content.slice(lastIndex, match.index).trim()
-    if (antes) resultado.push({ tipo: 'texto', conteudo: antes })
-    resultado.push({
-      tipo: 'imagem-flutuante',
-      lado: match[1] as 'left' | 'right',
-      largura: match[2],
-      src: match[3],
-      legenda: match[4] || '',
-      textoAoLado: match[5].trim(),
-    })
-    lastIndex = match.index + match[0].length
-  }
-  const resto = content.slice(lastIndex).trim()
-  if (resto) resultado.push({ tipo: 'texto', conteudo: resto })
-  const videoRegex = /<div style="position:relative;padding-bottom:56\.25%[^>]*>[\s\S]*?<\/div>(?:\n\*([^*]*)\*)?/g
-  let resultado2: Bloco[] = []
-  let lastIndex2 = 0
-  let match2
-  const contentToProcess = resultado.length === 1 && resultado[0].tipo === 'texto' ? (resultado[0] as any).conteudo : null
-  if (contentToProcess) {
-    while ((match2 = videoRegex.exec(contentToProcess)) !== null) {
-      const antes = contentToProcess.slice(lastIndex2, match2.index).trim()
-      if (antes) resultado2.push({ tipo: 'texto', conteudo: antes })
-      const iframeM = match2[0].match(/embed\/([\w-]{11})/)
-      if (iframeM) {
-        resultado2.push({ tipo: 'video', url: `https://www.youtube.com/watch?v=${iframeM[1]}`, legenda: match2[1] || '' })
+
+  // Parser sequencial — processa o conteúdo bloco a bloco
+  const blocos: Bloco[] = []
+  let restante = content.trim()
+
+  while (restante.length > 0) {
+    // 1. Imagem flutuante
+    const floatMatch = restante.match(/^<div style="float:(left|right);([^"]*width:([^;)"]+))[^"]*">\s*<img src="([^"]*)"[^>]*\/?>\s*(?:<p[^>]*>([^<]*)<\/p>)?\s*<\/div>
+?([\s\S]*?)<div style="clear:both"><\/div>/m)
+    if (floatMatch && restante.startsWith(floatMatch[0].substring(0, 20))) {
+      const idx = restante.indexOf(floatMatch[0])
+      if (idx === 0) {
+        blocos.push({
+          tipo: 'imagem-flutuante',
+          lado: floatMatch[1] as 'left' | 'right',
+          largura: floatMatch[3],
+          src: floatMatch[4],
+          legenda: floatMatch[5] || '',
+          textoAoLado: floatMatch[6].trim(),
+        })
+        restante = restante.slice(floatMatch[0].length).trim()
+        continue
       }
-      lastIndex2 = match2.index + match2[0].length
     }
-    if (resultado2.length > 0) {
-      const resto2 = contentToProcess.slice(lastIndex2).trim()
-      if (resto2) resultado2.push({ tipo: 'texto', conteudo: resto2 })
-      resultado = resultado2
+
+    // 2. Galeria
+    const galeriaMatch = restante.match(/^<div class="galeria-wrap"[^>]*>([\s\S]*?)<\/div>
+<script>[\s\S]*?<\/script>/m)
+    if (galeriaMatch && restante.startsWith('<div class="galeria-wrap"')) {
+      const imagens: { src: string; legenda: string }[] = []
+      const slideRegex = /<img src="([^"]*)"[^>]*\/>(?:<p[^>]*>([^<]*)<\/p>)?/g
+      let sm
+      while ((sm = slideRegex.exec(galeriaMatch[1])) !== null) {
+        imagens.push({ src: sm[1], legenda: sm[2] || '' })
+      }
+      blocos.push({ tipo: 'galeria', imagens })
+      restante = restante.slice(galeriaMatch[0].length).trim()
+      continue
+    }
+
+    // 3. Imagem simples (figure)
+    const figureMatch = restante.match(/^<figure[^>]*>\s*<img src="([^"]*)"[^>]*\/?>\s*(?:<figcaption[^>]*>([^<]*)<\/figcaption>)?\s*<\/figure>/m)
+    if (figureMatch && restante.startsWith('<figure')) {
+      const alignMatch = figureMatch[0].match(/width:([\d.]+%?)/)
+      const marginMatch = figureMatch[0].match(/margin:([^";\s]+)/)
+      let alinhamento: 'full' | 'center' | 'left' | 'right' = 'full'
+      if (alignMatch) {
+        const w = alignMatch[1]
+        if (w === '70%') alinhamento = 'center'
+        else if (w === '45%') {
+          alinhamento = marginMatch?.[1].includes('auto 1rem 0') ? 'right' : 'left'
+        }
+      }
+      blocos.push({
+        tipo: 'imagem-simples',
+        src: figureMatch[1],
+        legenda: figureMatch[2] || '',
+        alinhamento,
+      })
+      restante = restante.slice(figureMatch[0].length).trim()
+      continue
+    }
+
+    // 4. Video YouTube
+    const videoMatch = restante.match(/^<div style="position:relative;padding-bottom:56\.25%[^"]*">([\s\S]*?)<\/div>(?:
+\*([^*]*)\*)?/)
+    if (videoMatch && restante.startsWith('<div style="position:relative;padding-bottom:56.25%')) {
+      const iframeM = videoMatch[1].match(/embed\/([\w-]{11})/)
+      if (iframeM) {
+        blocos.push({ tipo: 'video', url: `https://www.youtube.com/watch?v=${iframeM[1]}`, legenda: videoMatch[2] || '' })
+        restante = restante.slice(videoMatch[0].length).trim()
+        continue
+      }
+    }
+
+    // 5. Texto — pega até o próximo bloco especial
+    const nextSpecial = restante.search(/
+
+<(div|figure|script)/)
+    if (nextSpecial > 0) {
+      blocos.push({ tipo: 'texto', conteudo: restante.slice(0, nextSpecial).trim() })
+      restante = restante.slice(nextSpecial).trim()
+    } else {
+      blocos.push({ tipo: 'texto', conteudo: restante })
+      break
     }
   }
-  if (resultado.length === 0) resultado.push({ tipo: 'texto', conteudo: content })
-  return resultado
+
+  return blocos.length > 0 ? blocos : [{ tipo: 'texto', conteudo: content }]
 }
 
 const s: Record<string, React.CSSProperties> = {
