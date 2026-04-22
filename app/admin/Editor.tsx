@@ -397,7 +397,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
           <label style={s.label}>Conteúdo</label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {blocos.map((bloco, idx) => (
-              <div key={idx}>
+              <div key={idx + '-' + ('src' in bloco ? bloco.src : '') + '-' + ('imagens' in bloco ? bloco.imagens.length : '')}>
                 {bloco.tipo === 'texto' ? (
                   <div style={s.blocoTexto}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
