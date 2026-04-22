@@ -23,7 +23,15 @@ export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
       <img
         src={slides[atual].src}
         alt={slides[atual].legenda}
-        style={{ width: '100%', height: '320px', objectFit: 'cover', display: 'block', borderRadius: '6px' }}
+        style={{
+          width: '100%',
+          height: 'auto',
+          maxHeight: '480px',
+          objectFit: 'contain',
+          display: 'block',
+          borderRadius: '6px',
+          background: '#111',
+        }}
       />
       {slides[atual].legenda && (
         <p style={{ fontSize: '0.75rem', color: '#888', textAlign: 'center', marginTop: '0.4rem', fontStyle: 'italic' }}>
