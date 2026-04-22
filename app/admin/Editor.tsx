@@ -25,7 +25,7 @@ const categorias = [
   { value: 'escola', label: 'Escola' },
   { value: 'esportes', label: 'Esportes' },
   { value: 'cultura', label: 'Cultura' },
-  { value: 'opiniao', label: 'OpiniÃ£o' },
+  { value: 'opiniao', label: 'Opinião' },
 ]
 
 function parseFrontmatter(raw: string): { fm: Frontmatter; content: string } {
@@ -339,7 +339,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
   }
 
   async function salvar() {
-    if (!slug) return setErro('TÃ­tulo obrigatÃ³rio.')
+    if (!slug) return setErro('Título obrigatório.')
     setSaving(true); setErro('')
     const content = blocosParaMDX(blocos)
     const res = await fetch('/api/admin/salvar', {
@@ -358,7 +358,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
 
   if (loading) return (
     <div style={{ ...s.page, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
-      Carregando matÃ©ria...
+      Carregando matéria...
     </div>
   )
 
@@ -366,9 +366,9 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
     <div style={s.page}>
       <header style={s.header}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link href="/admin" style={{ color: '#888', fontSize: '0.875rem' }}>â† MatÃ©rias</Link>
+          <Link href="/admin" style={{ color: '#888', fontSize: '0.875rem' }}>← Matérias</Link>
           <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.1rem', fontWeight: 700 }}>
-            {isEdit ? `Editando: ${slugProp}` : 'Nova matÃ©ria'}
+            {isEdit ? `Editando: ${slugProp}` : 'Nova matéria'}
           </span>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
@@ -381,7 +381,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
             }}>ðŸ‘ Preview</a>
           )}
           <button onClick={salvar} disabled={saving} style={s.saveBtn}>
-            {saving ? 'Salvando...' : 'Salvar matÃ©ria'}
+            {saving ? 'Salvando...' : 'Salvar matéria'}
           </button>
         </div>
       </header>
@@ -389,14 +389,14 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
       <main style={s.main}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
           <div>
-            <label style={s.label}>TÃ­tulo *</label>
+            <label style={s.label}>Título *</label>
             <input style={{ ...s.input, fontSize: '1.2rem', fontFamily: 'Playfair Display, serif' }}
               value={fm.title} onChange={e => { setFm(f => ({ ...f, title: e.target.value })); if (!isEdit) setSlug(gerarSlug(e.target.value)) }}
-              placeholder="TÃ­tulo da matÃ©ria" />
+              placeholder="Título da matéria" />
             {slug && <div style={{ color: '#888', fontSize: '0.75rem', marginTop: '0.3rem' }}>Slug: {slug}</div>}
           </div>
           <div>
-            <label style={s.label}>SubtÃ­tulo / Olho</label>
+            <label style={s.label}>Subtítulo / Olho</label>
             <input style={s.input} value={fm.subtitle} onChange={e => setFm(f => ({ ...f, subtitle: e.target.value }))} placeholder="Frase de abertura" />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
@@ -436,7 +436,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
         </div>
 
         <div>
-          <label style={s.label}>ConteÃºdo</label>
+          <label style={s.label}>Conteúdo</label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {blocos.map((bloco, idx) => (
               <div key={idx + '-' + ('src' in bloco ? bloco.src : '') + '-' + ('imagens' in bloco ? bloco.imagens.length : '')}>
@@ -444,15 +444,15 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                   <div style={s.blocoTexto}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                       <span style={{ color: '#888', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Texto</span>
-                      {blocos.length > 1 && <button onClick={() => removeBloco(idx)} style={s.removeBtn}>âœ• remover</button>}
+                      {blocos.length > 1 && <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>}
                     </div>
                     <RichEditor value={bloco.conteudo} onChange={val => updateBloco(idx, { conteudo: val })} placeholder="Escreva o texto aqui..." />
                   </div>
                 ) : bloco.tipo === 'imagem-flutuante' ? (
                   <div style={s.blocoImagem}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                      <span style={{ color: '#c8392b', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>ðŸ–¼ Imagem com texto ao lado</span>
-                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>âœ• remover</button>
+                      <span style={{ color: '#c8392b', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>🖼 Imagem com texto ao lado</span>
+                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -479,7 +479,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           <div style={{ flex: 1 }}>
-                            <label style={s.label}>PosiÃ§Ã£o</label>
+                            <label style={s.label}>Posição</label>
                             <div style={{ display: 'flex', gap: '0.4rem' }}>
                               {(['left', 'right'] as const).map(l => (
                                 <button key={l} onClick={() => updateBloco(idx, { lado: l })} style={{
@@ -489,7 +489,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                                   color: bloco.lado === l ? '#fff' : '#888',
                                   fontFamily: 'Space Grotesk, sans-serif',
                                 }}>
-                                  {l === 'left' ? 'â† Esq' : 'Dir â†’'}
+                                  {l === 'left' ? '← Esq' : 'Dir ←’'}
                                 </button>
                               ))}
                             </div>
@@ -498,7 +498,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                             <label style={s.label}>Tamanho</label>
                             <select style={s.select} value={bloco.largura} onChange={e => updateBloco(idx, { largura: e.target.value })}>
                               <option value="160px">Pequena</option>
-                              <option value="220px">MÃ©dia</option>
+                              <option value="220px">Média</option>
                               <option value="300px">Grande</option>
                             </select>
                           </div>
@@ -517,8 +517,8 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                 {bloco.tipo === 'video' && (
                   <div style={{ ...s.blocoTexto, borderColor: '#4a9fd4' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                      <span style={{ color: '#4a9fd4', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>ðŸ“¹ VÃ­deo do YouTube</span>
-                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>âœ• remover</button>
+                      <span style={{ color: '#4a9fd4', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>ðŸ“¹ Vídeo do YouTube</span>
+                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '0.75rem' }}>
                       <div>
@@ -533,7 +533,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                       )}
                       <div>
                         <label style={s.label}>Legenda (opcional)</label>
-                        <input style={s.input} value={bloco.legenda} onChange={e => updateBloco(idx, { legenda: e.target.value })} placeholder="DescriÃ§Ã£o do vÃ­deo" />
+                        <input style={s.input} value={bloco.legenda} onChange={e => updateBloco(idx, { legenda: e.target.value })} placeholder="Descrição do vídeo" />
                       </div>
                     </div>
                   </div>
@@ -542,8 +542,8 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                 {bloco.tipo === 'imagem-simples' && (
                   <div style={{ ...s.blocoTexto, borderColor: '#3db87a' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                      <span style={{ color: '#3db87a', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>ðŸ–¼ Imagem</span>
-                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>âœ• remover</button>
+                      <span style={{ color: '#3db87a', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>🖼 Imagem</span>
+                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '0.75rem' }}>
                       {uploadingIdx === idx ? (
@@ -579,7 +579,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                       </div>
                       <div>
                         <label style={s.label}>Legenda (opcional)</label>
-                        <input style={s.input} value={bloco.legenda} onChange={e => updateBloco(idx, { legenda: e.target.value })} placeholder="DescriÃ§Ã£o da imagem" />
+                        <input style={s.input} value={bloco.legenda} onChange={e => updateBloco(idx, { legenda: e.target.value })} placeholder="Descrição da imagem" />
                       </div>
                     </div>
                   </div>
@@ -588,8 +588,8 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                 {bloco.tipo === 'galeria' && (
                   <div style={{ ...s.blocoTexto, borderColor: '#a870d4' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                      <span style={{ color: '#a870d4', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>ðŸ–¼ Galeria / Carrossel</span>
-                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>âœ• remover</button>
+                      <span style={{ color: '#a870d4', fontSize: '0.75rem', textTransform: 'uppercase' as const, letterSpacing: '0.05em', fontWeight: 600 }}>🖼 Galeria / Carrossel</span>
+                      <button onClick={() => removeBloco(idx)} style={s.removeBtn}>✕ remover</button>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '0.75rem' }}>
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' as const }}>
@@ -601,7 +601,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                                 if (i !== idx || b.tipo !== 'galeria') return b
                                 return { ...b, imagens: b.imagens.filter((_, j) => j !== imgIdx) }
                               }))
-                            }} style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(200,57,43,0.9)', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', color: '#fff', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>âœ•</button>
+                            }} style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(200,57,43,0.9)', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', color: '#fff', fontSize: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
                           </div>
                         ))}
                         <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100px', height: '100px', background: uploadingIdx === idx ? '#111' : '#0a0a0a', border: '1px dashed #444', borderRadius: '4px', cursor: 'pointer', color: '#888', fontSize: '0.75rem', flexDirection: 'column' as const, gap: '0.25rem' }}>
@@ -612,7 +612,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                       </div>
                       {bloco.imagens.length > 0 && (
                         <div style={{ color: '#888', fontSize: '0.8rem' }}>
-                          {bloco.imagens.length} foto{bloco.imagens.length > 1 ? 's' : ''} â€” no site as fotos passam com setas â† â†’
+                          {bloco.imagens.length} foto{bloco.imagens.length > 1 ? 's' : ''} â€” no site as fotos passam com setas ← ←’
                         </div>
                       )}
                     </div>
@@ -624,7 +624,7 @@ export default function Editor({ slug: slugProp }: { slug?: string }) {
                   <button style={s.addBtn} onClick={() => addBloco('imagem-flutuante', idx)}>+ Img com texto</button>
                   <button style={s.addBtn} onClick={() => addBloco('imagem-simples', idx)}>+ Imagem</button>
                   <button style={s.addBtn} onClick={() => addBloco('galeria', idx)}>+ Galeria</button>
-                  <button style={s.addBtn} onClick={() => addBloco('video', idx)}>+ VÃ­deo</button>
+                  <button style={s.addBtn} onClick={() => addBloco('video', idx)}>+ Vídeo</button>
                 </div>
               </div>
             ))}
