@@ -11,6 +11,8 @@ import { getAllPosts, getPostBySlug, formatDate, readingTime } from '@/lib/posts
 import ReadingProgress from '@/components/ReadingProgress'
 import GaleriaCarrossel from '@/components/GaleriaCarrossel'
 
+const BASE_URL = 'https://alo-virgilia.vercel.app'
+
 export async function generateStaticParams() {
   const posts = getAllPosts()
   return posts.map(post => ({ slug: post.slug }))
@@ -19,6 +21,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const post = getPostBySlug(params.slug)
   if (!post) return {}
+
+  // Garante URL absoluta para og:image (WhatsApp exige URL completa)
+  const imageUrl = post.image
+    ? post.image.startsWith('http') ? post.image : `${BASE_URL}${post.image}`
+    : undefined
+
   return {
     title: `${post.title} | Alô Virgília`,
     description: post.subtitle || post.title,
@@ -28,7 +36,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       type: 'article',
       publishedTime: post.date,
       authors: [post.author],
-      images: post.image ? [{ url: post.image }] : [],
+      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630 }] : [],
     },
   }
 }
