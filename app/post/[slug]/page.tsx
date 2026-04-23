@@ -22,10 +22,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const post = getPostBySlug(params.slug)
   if (!post) return {}
 
-  // Garante URL absoluta para og:image (WhatsApp exige URL completa)
-  const imageUrl = post.image
-    ? post.image.startsWith('http') ? post.image : `${BASE_URL}${post.image}`
-    : undefined
+  // Garante URL absoluta para og:image com otimização do Vercel (comprime sem perder qualidade)
+  function getOgImageUrl(image: string): string {
+    if (!image) return ''
+    // Se já é URL absoluta (ex: raw.github), usa direto
+    if (image.startsWith('http')) return image
+    // Se é caminho local (/uploads/...), usa o otimizador do Vercel
+    const encoded = encodeURIComponent(image)
+    return `${BASE_URL}/_next/image?url=${encoded}&w=1200&q=80`
+  }
+  const imageUrl = post.image ? getOgImageUrl(post.image) : undefined
 
   return {
     title: `${post.title} | Alô Virgília`,
