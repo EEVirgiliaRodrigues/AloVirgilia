@@ -103,27 +103,48 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
         </div>
         <nav className="site-nav">
           {navLinks.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`nav-link${isActive(href) ? ' nav-ativo' : ''}`}
-            >
-              {label}
-            </Link>
+            href.startsWith('/categoria') ? (
+              <a
+                key={href}
+                href={href}
+                className={`nav-link${isActive(href) ? ' nav-ativo' : ''}`}
+              >
+                {label}
+              </a>
+            ) : (
+              <Link
+                key={href}
+                href={href}
+                className={`nav-link${isActive(href) ? ' nav-ativo' : ''}`}
+              >
+                {label}
+              </Link>
+            )
           ))}
         </nav>
 
         {menuAberto && (
           <div className="mobile-menu">
             {navLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`mobile-menu-link${isActive(href) ? ' nav-ativo' : ''}`}
-                onClick={() => setMenuAberto(false)}
-              >
-                {label}
-              </Link>
+              href.startsWith('/categoria') ? (
+                <a
+                  key={href}
+                  href={href}
+                  className={`mobile-menu-link${isActive(href) ? ' nav-ativo' : ''}`}
+                  onClick={() => setMenuAberto(false)}
+                >
+                  {label}
+                </a>
+              ) : (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`mobile-menu-link${isActive(href) ? ' nav-ativo' : ''}`}
+                  onClick={() => setMenuAberto(false)}
+                >
+                  {label}
+                </Link>
+              )
             ))}
           </div>
         )}
