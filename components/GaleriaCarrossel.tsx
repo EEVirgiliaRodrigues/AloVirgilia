@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface Slide {
   src: string
@@ -13,8 +13,8 @@ interface GaleriaCarrosselProps {
 export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
   const [atual, setAtual] = useState(0)
   const [carregadas, setCarregadas] = useState<Set<number>>(new Set([0]))
+  const touchStartX = useRef<number | null>(null)
 
-  // Pré-carrega todas as imagens ao montar
   useEffect(() => {
     slides.forEach((slide, i) => {
       const img = new Image()
@@ -28,8 +28,25 @@ export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
   const prev = () => setAtual(i => (i - 1 + slides.length) % slides.length)
   const next = () => setAtual(i => (i + 1) % slides.length)
 
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return
+    const diff = touchStartX.current - e.changedTouches[0].clientX
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? next() : prev()
+    }
+    touchStartX.current = null
+  }
+
   return (
-    <div style={{ position: 'relative', margin: '1.5rem 0', borderRadius: '8px', overflow: 'hidden' }}>
+    <div
+      style={{ position: 'relative', margin: '1.5rem 0', borderRadius: '8px', overflow: 'hidden', touchAction: 'pan-y' }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <style>{`
         .galeria-img {
           width: 100%;
@@ -40,6 +57,8 @@ export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
           border-radius: 6px;
           background: #111;
           transition: opacity 0.2s ease;
+          user-select: none;
+          -webkit-user-drag: none;
         }
         @media (max-width: 600px) {
           .galeria-img {
@@ -50,7 +69,6 @@ export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
         }
       `}</style>
 
-      {/* Pré-carrega imagens escondidas */}
       <div style={{ display: 'none' }}>
         {slides.map((slide, i) => (
           <img key={i} src={slide.src} alt="" />
@@ -62,6 +80,7 @@ export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
         alt={slides[atual].legenda}
         className="galeria-img"
         style={{ opacity: carregadas.has(atual) ? 1 : 0.5 }}
+        draggable={false}
       />
       {slides[atual].legenda && (
         <p style={{ fontSize: '0.75rem', color: '#888', textAlign: 'center', marginTop: '0.4rem', fontStyle: 'italic' }}>
