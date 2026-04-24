@@ -18,6 +18,8 @@ const descs: Record<string, string> = {
   opiniao: 'O que os alunos têm a dizer.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export async function generateStaticParams() {
   return Object.keys(labels).map(slug => ({ slug }))
 }
