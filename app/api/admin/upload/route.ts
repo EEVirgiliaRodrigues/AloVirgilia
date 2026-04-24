@@ -15,20 +15,22 @@ export async function POST(req: NextRequest) {
   const owner = 'EEVirgiliaRodrigues'
   const repo = 'AloVirgilia'
 
-  const bytes = await file.arrayBuffer()
-  let buffer = Buffer.from(bytes)
+  const arrayBuffer = await file.arrayBuffer()
+  const inputBuffer = Buffer.from(new Uint8Array(arrayBuffer))
+  let outputBuffer: Buffer = inputBuffer
   let filename = `${Date.now()}-${file.name.replace(/[^a-z0-9.-]/gi, '-')}`
 
   // Imagens de capa: comprime para menos de 300KB para WhatsApp
   if (tipo === 'capa') {
-    buffer = await sharp(buffer)
+    const compressed = await sharp(inputBuffer)
       .resize({ width: 1200, withoutEnlargement: true })
       .jpeg({ quality: 80 })
       .toBuffer()
+    outputBuffer = Buffer.from(new Uint8Array(compressed))
     filename = filename.replace(/\.[^.]+$/, '') + '.jpg'
   }
 
-  const base64 = buffer.toString('base64')
+  const base64 = outputBuffer.toString('base64')
   const path = `public/uploads/${filename}`
 
   const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
