@@ -23,7 +23,8 @@
     "@tiptap/pm": "^2.4.0",
     "@tiptap/starter-kit": "^2.4.0",
     "@tiptap/extension-underline": "^2.4.0",
-    "@tiptap/extension-placeholder": "^2.4.0"
+    "@tiptap/extension-placeholder": "^2.4.0",
+    "sharp": "^0.33.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
