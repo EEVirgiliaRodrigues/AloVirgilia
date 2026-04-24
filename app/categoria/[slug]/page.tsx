@@ -12,10 +12,10 @@ const labels: Record<string, string> = {
 }
 
 const descs: Record<string, string> = {
-  escola: 'Biblioteca, grêmio, cantina, cotidiano — a escola por dentro.',
+  escola: 'Biblioteca, grêmio, cotidiano: a escola por dentro.',
   esportes: 'Jogos, torneios e os atletas que você vê todo dia no corredor.',
   cultura: 'Arte, música, cinema, literatura e o que está acontecendo.',
-  opiniao: 'O que os alunos têm a dizer — sem filtro e com assinatura.',
+  opiniao: 'O que os alunos têm a dizer.',
 }
 
 export async function generateStaticParams() {
