@@ -12,14 +12,14 @@ interface GaleriaCarrosselProps {
 
 export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
   const [atual, setAtual] = useState(0)
-  const [carregadas, setCarregadas] = useState<Set<number>>(new Set([0]))
+  const [carregadas, setCarregadas] = useState<Set<number>>(new Set<number>([0]))
   const touchStartX = useRef<number | null>(null)
 
   useEffect(() => {
     slides.forEach((slide, i) => {
       const img = new Image()
       img.src = slide.src
-      img.onload = () => setCarregadas(prev => new Set([...prev, i]))
+      img.onload = () => setCarregadas(prev => { const s = new Set(Array.from(prev)); s.add(i); return s; })
     })
   }, [slides])
 
