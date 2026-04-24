@@ -116,7 +116,8 @@ export default function Home() {
               </div>
               <div className="grade">
                 {demais.map((post, i) => (
-                  <article key={post.slug} className="gcard" style={{ '--anim-delay': `${i * 0.1}s` } as React.CSSProperties}>
+                  <article key={post.slug} className="gcard" style={{ '--anim-delay': `${i * 0.1}s`, position: 'relative' } as React.CSSProperties}>
+                    <a href={`/post/${post.slug}`} aria-label={post.title} style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
                     {post.image ? (
                       <div className="gcard-img">
                         <img src={post.image} alt={post.title} />
@@ -130,7 +131,7 @@ export default function Home() {
                       {post.category.toUpperCase()}
                     </span>
                     <h2 className="gcard-titulo">
-                      <Link href={`/post/${post.slug}`}>{post.title}</Link>
+                      <a href={`/post/${post.slug}`} style={{ position: 'relative', zIndex: 2 }}>{post.title}</a>
                     </h2>
                     <div className="gcard-meta">{post.author} · {formatDate(post.date)}</div>
                   </article>

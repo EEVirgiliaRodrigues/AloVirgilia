@@ -1,96 +1,155 @@
+import React from 'react'
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { getAllPosts, formatDate, isNovo } from '@/lib/posts'
+import ShareButton from '@/components/ShareButton'
+import { getAllPosts, getPostBySlug, formatDate, readingTime } from '@/lib/posts'
+import ReadingProgress from '@/components/ReadingProgress'
+import GaleriaCarrossel from '@/components/GaleriaCarrossel'
 
-const labels: Record<string, string> = {
-  escola: 'Escola',
-  esportes: 'Esportes',
-  cultura: 'Cultura',
-  opiniao: 'Opinião',
-}
-
-const descs: Record<string, string> = {
-  escola: 'Biblioteca, grêmio, cotidiano: a escola por dentro.',
-  esportes: 'Jogos, torneios e os atletas que você vê todo dia no corredor.',
-  cultura: 'Arte, música, cinema, literatura e o que está acontecendo.',
-  opiniao: 'O que os alunos têm a dizer.',
-}
-
-export const revalidate = 60
+const BASE_URL = 'https://alo-virgilia.vercel.app'
 
 export async function generateStaticParams() {
-  return Object.keys(labels).map(slug => ({ slug }))
+  const posts = getAllPosts()
+  return posts.map(post => ({ slug: post.slug }))
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const label = labels[params.slug] || params.slug
+  const post = getPostBySlug(params.slug)
+  if (!post) return {}
+
+  // Garante URL absoluta para og:image com otimização do Vercel (comprime sem perder qualidade)
+  function getOgImageUrl(image: string): string {
+    if (!image) return ''
+    // Se já é URL absoluta (ex: raw.github), usa direto
+    if (image.startsWith('http')) return image
+    // Se é caminho local (/uploads/...), usa o otimizador do Vercel
+    const encoded = encodeURIComponent(image)
+    return `${BASE_URL}/_next/image?url=${encoded}&w=1200&q=80`
+  }
+  const imageUrl = post.image ? getOgImageUrl(post.image) : undefined
+
   return {
-    title: `${label} | Alô Virgília`,
-    description: descs[params.slug] || `Matérias da editoria ${label}.`,
+    title: `${post.title} | Alô Virgília`,
+    description: post.subtitle || post.title,
+    openGraph: {
+      title: post.title,
+      description: post.subtitle || post.title,
+      url: `${BASE_URL}/post/${params.slug}`,
+      siteName: 'Alô Virgília',
+      type: 'article',
+      publishedTime: post.date,
+      authors: [post.author],
+      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630, alt: post.title }] : [],
+    },
   }
 }
 
-export default function CategoriaPage({ params }: { params: { slug: string } }) {
+function parseConteudo(content: string) {
+  const partes: { tipo: 'mdx' | 'galeria'; conteudo: string; slides?: { src: string; legenda: string }[] }[] = []
+  const galeriaRegex = /<div class="galeria-wrap"[^>]*>([\s\S]*?)<\/div>\n<script>[\s\S]*?<\/script>/g
+  let lastIndex = 0
+  let match
+
+  while ((match = galeriaRegex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      const antes = content.slice(lastIndex, match.index).replace(/<script>[\s\S]*?<\/script>/g, '')
+      if (antes.trim()) partes.push({ tipo: 'mdx', conteudo: antes })
+    }
+    const slides: { src: string; legenda: string }[] = []
+    const slideRegex = /<img src="([^"]*)"[^>]*\/>(?:[\s\S]*?<p[^>]*>([^<]*)<\/p>)?/g
+    let sm
+    while ((sm = slideRegex.exec(match[1])) !== null) {
+      slides.push({ src: sm[1], legenda: sm[2] || '' })
+    }
+    partes.push({ tipo: 'galeria', conteudo: '', slides })
+    lastIndex = match.index + match[0].length
+  }
+
+  const resto = content.slice(lastIndex).replace(/<script>[\s\S]*?<\/script>/g, '')
+  if (resto.trim()) partes.push({ tipo: 'mdx', conteudo: resto })
+  return partes.length > 0 ? partes : [{ tipo: 'mdx' as const, conteudo: content }]
+}
+
+export default function PostPage({ params }: { params: { slug: string } }) {
+  const post = getPostBySlug(params.slug)
   const allPosts = getAllPosts()
-  const posts = allPosts.filter(p => p.category === params.slug)
-  const label = labels[params.slug] || params.slug
+  if (!post) notFound()
+  const minutos = readingTime(post.content)
+  const relacionados = allPosts.filter(p => p.category === post.category && p.slug !== post.slug).slice(0, 3)
+  const partes = parseConteudo(post.content)
 
   return (
     <>
+      <ReadingProgress />
       <Header posts={allPosts.slice(0, 8)} />
       <main>
-        <div className="capa-wrap">
-          <section className="arquivo-section">
-
-            {/* Cabeçalho da editoria */}
-            <div className="arquivo-header">
-              <div className="arquivo-header-left">
-                <span className={`arquivo-editoria cat-${params.slug}`}>{label}</span>
-                <p className="arquivo-desc">{descs[params.slug]}</p>
-              </div>
+        <article className="post-full">
+          <header className="post-header">
+            <div className="post-meta-top">
+              <span className={`post-category cat-${post.category}`}>{post.category.toUpperCase()}</span>
+              <span className="post-date">{formatDate(post.date)}</span>
+              <span className="post-leitura">{minutos} min de leitura</span>
             </div>
+            <h1 className="post-title">{post.title}</h1>
+            {post.subtitle && <p className="post-subtitle">{post.subtitle}</p>}
+            <div className="post-byline">Por <strong>{post.author}</strong></div>
+            {post.image && (
+              <figure className="post-cover">
+                <img src={post.image} alt={post.title} />
+                {post.image_caption && <figcaption>{post.image_caption}</figcaption>}
+              </figure>
+            )}
+          </header>
 
-            {posts.length === 0 ? (
-              <div className="sem-posts">Nenhuma matéria nessa editoria ainda.</div>
-            ) : (
-              <div className="arquivo-lista">
-                {posts.map((post, i) => (
-                  <article key={post.slug} className="arquivo-item">
-                    <div className="arquivo-item-num">{String(i + 1).padStart(2, '0')}</div>
+          <div className="post-body">
+            {partes.map((parte, i) =>
+              parte.tipo === 'galeria' ? (
+                <GaleriaCarrossel key={i} slides={parte.slides!} />
+              ) : (
+                <ReactMarkdown key={i} rehypePlugins={[rehypeRaw]}>
+                  {parte.conteudo}
+                </ReactMarkdown>
+              )
+            )}
+          </div>
 
-                    <div className="arquivo-item-inner">
-                      <div className="arquivo-item-body">
-                        <div className="arquivo-item-meta">
-                          {isNovo(post.date) && <span className="badge-novo">novo</span>}
-                          <span className="arquivo-item-date">{formatDate(post.date)}</span>
-                          <span className="sep">·</span>
-                          <span className="arquivo-item-author">{post.author}</span>
-                        </div>
-                        <h2 className="arquivo-item-titulo">
-                          <Link href={`/post/${post.slug}`}>{post.title}</Link>
-                        </h2>
-                        {post.subtitle && (
-                          <p className="arquivo-item-sub">{post.subtitle}</p>
-                        )}
-                        <Link href={`/post/${post.slug}`} className="arquivo-item-link">
-                          Ler matéria →
-                        </Link>
-                      </div>
+          <footer className="post-footer">
+            <Link href="/" className="back-link">← Voltar para a capa</Link>
+            <ShareButton title={post.title} />
+          </footer>
+        </article>
 
-                      {post.image && (
-                        <div className="arquivo-item-img">
-                          <img src={post.image} alt={post.title} />
-                        </div>
-                      )}
-                    </div>
+        {relacionados.length > 0 && (
+          <section className="relacionados-wrap">
+            <div className="relacionados-inner">
+              <div className="grade-header">
+                <span className="grade-label">Leia também</span>
+                <div className="grade-line" />
+              </div>
+              <div className="grade">
+                {relacionados.map((p, i) => (
+                  <article key={p.slug} className="gcard" style={{ '--anim-delay': `${i * 0.1}s`, position: 'relative' } as React.CSSProperties}>
+                    <a href={`/post/${p.slug}`} aria-label={p.title} style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
+                    {p.image ? (
+                      <div className="gcard-img"><img src={p.image} alt={p.title} /></div>
+                    ) : (
+                      <div className={`gcard-img-placeholder cat-${p.category}-bg`} />
+                    )}
+                    <div className="gcard-num">{String(i + 1).padStart(2, '0')}</div>
+                    <span className={`gcard-cat cat-${p.category}`}>{p.category.toUpperCase()}</span>
+                    <h2 className="gcard-titulo"><a href={`/post/${p.slug}`} style={{ position: 'relative', zIndex: 2 }}>{p.title}</a></h2>
+                    <div className="gcard-meta">{p.author} · {formatDate(p.date)}</div>
                   </article>
                 ))}
               </div>
-            )}
+            </div>
           </section>
-        </div>
+        )}
       </main>
       <Footer />
     </>

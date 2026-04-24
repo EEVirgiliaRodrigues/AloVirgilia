@@ -18,7 +18,7 @@ const descs: Record<string, string> = {
   opiniao: 'O que os alunos têm a dizer.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export async function generateStaticParams() {
   return Object.keys(labels).map(slug => ({ slug }))
@@ -57,7 +57,8 @@ export default function CategoriaPage({ params }: { params: { slug: string } }) 
             ) : (
               <div className="arquivo-lista">
                 {posts.map((post, i) => (
-                  <article key={post.slug} className="arquivo-item">
+                  <article key={post.slug} className="arquivo-item" style={{ position: 'relative', cursor: 'pointer' }}>
+                    <a href={`/post/${post.slug}`} aria-label={post.title} style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
                     <div className="arquivo-item-num">{String(i + 1).padStart(2, '0')}</div>
 
                     <div className="arquivo-item-inner">
@@ -69,14 +70,11 @@ export default function CategoriaPage({ params }: { params: { slug: string } }) 
                           <span className="arquivo-item-author">{post.author}</span>
                         </div>
                         <h2 className="arquivo-item-titulo">
-                          <Link href={`/post/${post.slug}`}>{post.title}</Link>
+                          <a href={`/post/${post.slug}`} style={{ position: 'relative', zIndex: 2 }}>{post.title}</a>
                         </h2>
                         {post.subtitle && (
                           <p className="arquivo-item-sub">{post.subtitle}</p>
                         )}
-                        <Link href={`/post/${post.slug}`} className="arquivo-item-link">
-                          Ler matéria →
-                        </Link>
                       </div>
 
                       {post.image && (
