@@ -11,7 +11,7 @@ const editorias = [
   { slug: 'opiniao', label: 'Opinião', desc: 'O que os alunos têm a dizer' },
 ]
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export default function Home() {
   const posts = getAllPosts()
