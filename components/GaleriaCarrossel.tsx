@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Slide {
   src: string
@@ -12,6 +12,16 @@ interface GaleriaCarrosselProps {
 
 export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
   const [atual, setAtual] = useState(0)
+  const [carregadas, setCarregadas] = useState<Set<number>>(new Set([0]))
+
+  // Pré-carrega todas as imagens ao montar
+  useEffect(() => {
+    slides.forEach((slide, i) => {
+      const img = new Image()
+      img.src = slide.src
+      img.onload = () => setCarregadas(prev => new Set([...prev, i]))
+    })
+  }, [slides])
 
   if (!slides || slides.length === 0) return null
 
@@ -29,6 +39,7 @@ export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
           display: block;
           border-radius: 6px;
           background: #111;
+          transition: opacity 0.2s ease;
         }
         @media (max-width: 600px) {
           .galeria-img {
@@ -38,10 +49,19 @@ export default function GaleriaCarrossel({ slides }: GaleriaCarrosselProps) {
           }
         }
       `}</style>
+
+      {/* Pré-carrega imagens escondidas */}
+      <div style={{ display: 'none' }}>
+        {slides.map((slide, i) => (
+          <img key={i} src={slide.src} alt="" />
+        ))}
+      </div>
+
       <img
         src={slides[atual].src}
         alt={slides[atual].legenda}
         className="galeria-img"
+        style={{ opacity: carregadas.has(atual) ? 1 : 0.5 }}
       />
       {slides[atual].legenda && (
         <p style={{ fontSize: '0.75rem', color: '#888', textAlign: 'center', marginTop: '0.4rem', fontStyle: 'italic' }}>
