@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" fill="#0a0a0a" rx="4"/>
-  <text x="16" y="23" font-family="Georgia, serif" font-size="22" font-weight="bold" font-style="italic" fill="#c8392b" text-anchor="middle">A</text>
+  <text x="16" y="15" font-family="Georgia, 'Times New Roman', serif" font-size="11" font-weight="700" font-style="italic" fill="#c8392b" text-anchor="middle">Alô</text>
+  <text x="16" y="25" font-family="Georgia, 'Times New Roman', serif" font-size="5" font-weight="400" fill="#f0ede6" text-anchor="middle" letter-spacing="1">VIRGÍLIA</text>
 </svg>
