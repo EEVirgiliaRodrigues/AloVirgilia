@@ -192,11 +192,13 @@ img { max-width: 100%; display: block; }
 .manchete-sec-meta { font-family: var(--fonte-mono); font-size: 9px; letter-spacing: 0.08em; color: var(--muito-muted); text-transform: uppercase; margin-top: auto; }
 
 @media (max-width: 768px) {
-  .capa-main-nova { grid-template-columns: 1fr; }
-  .manchetes-secundarias { border-left: none; border-top: 1px solid var(--border); flex-direction: column; }
-  .manchete-sec { border-bottom: 1px solid var(--border); border-right: none; min-width: unset; }
-  .manchete-sec:last-child { border-bottom: none; }
-  .manchete-sec-img { height: 180px; }
+  .capa-main-nova { grid-template-columns: 1fr; gap: 1rem; padding: 0 0 1rem; }
+  .manchete-principal { margin-bottom: 1.25rem; }
+  .manchetes-secundarias { border-left: none; border-top: none; flex-direction: column; gap: 1rem; padding: 0 0.75rem; }
+  .manchete-sec { border-bottom: none; border-right: none; border: 1px solid var(--border); border-radius: 6px; min-width: unset; padding: 0; overflow: hidden; }
+  .manchete-sec-body { padding: 0.75rem 1rem 1rem; }
+  .manchete-sec:last-child { border-bottom: 1px solid var(--border); }
+  .manchete-sec-img { height: 180px; margin-bottom: 0; border-radius: 0; }
 }
 
 .manchete { padding: 1.75rem 1rem; border-right: 1px solid var(--border); animation: fadeUp 0.6s 0.1s ease both; }
