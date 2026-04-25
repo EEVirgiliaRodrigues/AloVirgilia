@@ -15,7 +15,7 @@
   --fonte-titulo: 'Playfair Display', Georgia, serif;
   --fonte-corpo: 'Space Grotesk', sans-serif;
   --fonte-mono: 'Space Mono', monospace;
-  --max: 1200px;
+  --max: 1100px;
 }
 
 [data-theme="light"] {
@@ -173,7 +173,7 @@ img { max-width: 100%; display: block; }
 .nav-ativo { color: var(--acento) !important; }
 
 .capa-wrap { max-width: var(--max); margin: 0 auto; padding: 0; }
-.capa-wrap .capa-main-nova { margin: 0 calc(-50vw + 50%); width: 100vw; }
+
 .capa-main { display: grid; grid-template-columns: 1fr 300px; min-height: 340px; border-bottom: 1px solid var(--border); }
 
 /* ── Nova capa com manchetes secundárias ── */
