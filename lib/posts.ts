@@ -14,6 +14,7 @@ export interface Post {
   image?: string
   image_caption?: string
   destaque?: boolean
+  secundaria?: boolean
   publicado?: boolean
   content: string
 }
@@ -72,6 +73,7 @@ function readPost(slug: string): Post | null {
       image: data.image || '',
       image_caption: data.image_caption || '',
       destaque: data.destaque === true || data.destaque === 'true',
+      secundaria: data.secundaria === true || data.secundaria === 'true',
       publicado: data.publicado === true || data.publicado === 'true',
       content,
     }
