@@ -193,9 +193,10 @@ img { max-width: 100%; display: block; }
 
 @media (max-width: 768px) {
   .capa-main-nova { grid-template-columns: 1fr; }
-  .manchetes-secundarias { border-left: none; border-top: 1px solid var(--border); flex-direction: row; overflow-x: auto; }
-  .manchete-sec { min-width: 240px; border-bottom: none; border-right: 1px solid var(--border); }
-  .manchete-sec:last-child { border-right: none; }
+  .manchetes-secundarias { border-left: none; border-top: 1px solid var(--border); flex-direction: column; }
+  .manchete-sec { border-bottom: 1px solid var(--border); border-right: none; min-width: unset; }
+  .manchete-sec:last-child { border-bottom: none; }
+  .manchete-sec-img { height: 180px; }
 }
 
 .manchete { padding: 1.75rem 1rem; border-right: 1px solid var(--border); animation: fadeUp 0.6s 0.1s ease both; }
