@@ -159,10 +159,10 @@ img { max-width: 100%; display: block; }
 
 .site-header { background: var(--bg); position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--acento); }
 .header-inner { max-width: var(--max); margin: 0 auto; }
-.header-top { display: flex; justify-content: space-between; align-items: center; padding: 7px 1.5rem; border-bottom: 1px solid var(--border); font-family: var(--fonte-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muito-muted); }
+.header-top { display: flex; justify-content: space-between; align-items: center; padding: 7px 1rem; border-bottom: 1px solid var(--border); font-family: var(--fonte-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muito-muted); }
 .header-live { display: flex; align-items: center; gap: 6px; }
 .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--acento); animation: pulse 1.8s ease-in-out infinite; flex-shrink: 0; display: inline-block; }
-.header-brand-row { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.5rem 0.7rem; border-bottom: 1px solid var(--border); }
+.header-brand-row { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1rem 0.7rem; border-bottom: 1px solid var(--border); }
 .site-title { font-family: var(--fonte-titulo); font-size: clamp(2rem, 5vw, 3.6rem); font-weight: 900; letter-spacing: -0.03em; line-height: 1; color: var(--texto); animation: fadeUp 0.6s ease both; }
 .site-title em { font-style: italic; color: var(--acento); }
 .header-edition { font-family: var(--fonte-mono); font-size: 9px; color: var(--muito-muted); letter-spacing: 0.08em; text-align: right; line-height: 1.7; }
@@ -198,7 +198,7 @@ img { max-width: 100%; display: block; }
   .manchete-sec:last-child { border-right: none; }
 }
 
-.manchete { padding: 1.75rem 1.5rem; border-right: 1px solid var(--border); animation: fadeUp 0.6s 0.1s ease both; }
+.manchete { padding: 1.75rem 1rem; border-right: 1px solid var(--border); animation: fadeUp 0.6s 0.1s ease both; }
 .manchete-cat { font-family: var(--fonte-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
 .manchete-cat::after { content: ''; display: block; height: 1px; width: 36px; background: currentColor; animation: barIn 0.7s 0.4s ease both; }
 .manchete-titulo { font-family: var(--fonte-titulo); font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: var(--texto); margin-bottom: 14px; }
