@@ -176,7 +176,7 @@ img { max-width: 100%; display: block; }
 .capa-main { display: grid; grid-template-columns: 1fr 300px; min-height: 340px; border-bottom: 1px solid var(--border); }
 
 /* ── Nova capa com manchetes secundárias ── */
-.capa-main-nova { display: grid; grid-template-columns: 1fr 300px; min-height: 280px; border-bottom: 1px solid var(--border); }
+.capa-main-nova { display: grid; grid-template-columns: 3fr 2fr; min-height: 280px; border-bottom: 1px solid var(--border); }
 .manchete-principal { position: relative; overflow: hidden; max-height: 420px; }
 .manchetes-secundarias { border-left: 1px solid var(--border); display: flex; flex-direction: column; }
 .manchete-sec { display: flex; flex-direction: column; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); transition: background 0.2s; text-decoration: none; color: inherit; flex: 1; }
