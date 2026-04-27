@@ -23,8 +23,8 @@
   --bg2: #f0ede6;
   --border: #d8d4ca;
   --texto: #0d0c0a;
-  --muted: #3a3530;
-  --muito-muted: #6a6560;
+  --muted: #111;
+  --muito-muted: #333;
   --acento: #c8392b;
 }
 
@@ -571,21 +571,21 @@ img { max-width: 100%; display: block; }
 
 /* ── Tema claro: textos mais escuros ── */
 [data-theme="light"] .manchete-sec-titulo { color: #000 !important; }
-[data-theme="light"] .manchete-sec-sub { color: #222 !important; }
-[data-theme="light"] .manchete-sec-meta { color: #444 !important; }
+[data-theme="light"] .manchete-sec-sub { color: #000 !important; }
+[data-theme="light"] .manchete-sec-meta { color: #111 !important; }
 [data-theme="light"] .manchete-titulo, [data-theme="light"] .manchete-titulo a { color: #000 !important; }
-[data-theme="light"] .manchete-sub { color: #111 !important; }
-[data-theme="light"] .manchete-meta { color: #333 !important; }
+[data-theme="light"] .manchete-sub { color: #000 !important; }
+[data-theme="light"] .manchete-meta { color: #111 !important; }
 [data-theme="light"] .gcard-titulo, [data-theme="light"] .gcard-titulo a { color: #000 !important; }
-[data-theme="light"] .gcard-meta { color: #444 !important; }
+[data-theme="light"] .gcard-meta { color: #111 !important; }
 [data-theme="light"] .grade-label { color: #000 !important; }
 [data-theme="light"] .arquivo-item-titulo a { color: #000 !important; }
-[data-theme="light"] .arquivo-item-sub { color: #222 !important; }
-[data-theme="light"] .arquivo-item-meta { color: #444 !important; }
-[data-theme="light"] .header-top { color: #222 !important; }
-[data-theme="light"] .header-live { color: #222 !important; }
-[data-theme="light"] .header-edition { color: #222 !important; }
+[data-theme="light"] .arquivo-item-sub { color: #000 !important; }
+[data-theme="light"] .arquivo-item-meta { color: #111 !important; }
+[data-theme="light"] .header-top { color: #000 !important; }
+[data-theme="light"] .header-live { color: #000 !important; }
+[data-theme="light"] .header-edition { color: #000 !important; }
 [data-theme="light"] .site-nav a { color: #000 !important; }
-[data-theme="light"] .footer-copy { color: #333 !important; }
-[data-theme="light"] .footer-tagline { color: #333 !important; }
-[data-theme="light"] .post-meta-top, [data-theme="light"] .post-date, [data-theme="light"] .post-leitura { color: #444 !important; }
+[data-theme="light"] .footer-copy { color: #000 !important; }
+[data-theme="light"] .footer-tagline { color: #000 !important; }
+[data-theme="light"] .post-meta-top, [data-theme="light"] .post-date, [data-theme="light"] .post-leitura { color: #111 !important; }
