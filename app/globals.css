@@ -545,3 +545,20 @@ img { max-width: 100%; display: block; }
 [data-theme="light"] .post-body h2, [data-theme="light"] .post-body h3 { color: #0d0c0a !important; }
 [data-theme="light"] .manchete-sec-titulo { color: #0d0c0a !important; }
 [data-theme="light"] .arquivo-item-titulo a { color: #0d0c0a !important; }
+
+/* ── Header contraste ── */
+:root .header-top { color: #ccc !important; }
+:root .header-live { color: #ccc !important; }
+:root .header-edition { color: #ccc !important; }
+:root .site-nav a { color: #f0ede6 !important; }
+:root .site-nav a:hover { color: var(--acento) !important; }
+:root .theme-toggle { color: #ccc !important; border-color: #444 !important; }
+
+/* ── Footer contraste ── */
+:root .site-footer { color: #ccc !important; }
+:root .footer-brand { color: #f5f2ec !important; }
+:root .footer-tagline { color: #ccc !important; }
+:root .footer-copy { color: #bbb !important; }
+:root .footer-link { color: #ccc !important; }
+:root .footer-text { color: #ccc !important; }
+:root footer, :root footer p, :root footer span { color: #ccc !important; }
