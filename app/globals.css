@@ -256,7 +256,7 @@ img { max-width: 100%; display: block; }
 .post-byline { font-family: var(--fonte-mono); font-size: 9px; color: var(--muito-muted); }
 .post-cover { margin-top: 1.5rem; }
 .post-cover img { width: 100%; max-height: 480px; object-fit: cover; }
-.post-cover figcaption { font-size: 13px; color: #ccc; font-style: italic; margin-top: 8px; font-family: var(--fonte-mono); }
+.post-cover figcaption { font-size: 14px; color: #ddd; font-style: italic; margin-top: 8px; font-family: var(--fonte-mono); }
 .post-body { font-size: 1.05rem; line-height: 1.8; color: #d0cdc6; text-align: justify; }
 .post-body p { margin-bottom: 1.5rem; text-align: justify; }
 .post-body > * { text-align: justify; }
