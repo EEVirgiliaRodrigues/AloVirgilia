@@ -589,3 +589,7 @@ img { max-width: 100%; display: block; }
 [data-theme="light"] .footer-copy { color: #000 !important; }
 [data-theme="light"] .footer-tagline { color: #000 !important; }
 [data-theme="light"] .post-meta-top, [data-theme="light"] .post-date, [data-theme="light"] .post-leitura { color: #111 !important; }
+
+/* ── Legenda da imagem de capa ── */
+:root:not([data-theme="light"]) .post-cover figcaption { color: #bbb !important; }
+[data-theme="light"] .post-cover figcaption { color: #222 !important; }
