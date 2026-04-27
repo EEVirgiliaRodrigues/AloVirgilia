@@ -91,7 +91,7 @@
 [data-theme="light"] .post-title { color: #0d0c0a; }
 [data-theme="light"] .post-subtitle { color: #1a1816; }
 [data-theme="light"] .post-byline { color: #5a5550; }
-[data-theme="light"] .post-cover figcaption { color: #5a5550; }
+[data-theme="light"] .post-cover figcaption { color: #222; }
 [data-theme="light"] .back-link { color: #1a1816; }
 [data-theme="light"] .back-link:hover { color: var(--acento); }
 
@@ -256,7 +256,7 @@ img { max-width: 100%; display: block; }
 .post-byline { font-family: var(--fonte-mono); font-size: 9px; color: var(--muito-muted); }
 .post-cover { margin-top: 1.5rem; }
 .post-cover img { width: 100%; max-height: 480px; object-fit: cover; }
-.post-cover figcaption { font-size: 11px; color: var(--muito-muted); font-style: italic; margin-top: 6px; font-family: var(--fonte-mono); }
+.post-cover figcaption { font-size: 11px; color: #bbb; font-style: italic; margin-top: 6px; font-family: var(--fonte-mono); }
 .post-body { font-size: 1.05rem; line-height: 1.8; color: #d0cdc6; text-align: justify; }
 .post-body p { margin-bottom: 1.5rem; text-align: justify; }
 .post-body > * { text-align: justify; }
