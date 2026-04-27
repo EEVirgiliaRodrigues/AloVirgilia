@@ -22,16 +22,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const post = getPostBySlug(params.slug)
   if (!post) return {}
 
-  // Garante URL absoluta para og:image com otimização do Vercel (comprime sem perder qualidade)
-  function getOgImageUrl(image: string): string {
-    if (!image) return ''
-    // Se já é URL absoluta (ex: raw.github), usa direto
-    if (image.startsWith('http')) return image
-    // Se é caminho local (/uploads/...), usa o otimizador do Vercel
-    const encoded = encodeURIComponent(image)
-    return `${BASE_URL}/_next/image?url=${encoded}&w=1200&q=80`
-  }
-  const imageUrl = post.image ? getOgImageUrl(post.image) : undefined
+  const imageUrl = post.image
+    ? post.image.startsWith('http') ? post.image : `${BASE_URL}${post.image}`
+    : undefined
 
   return {
     title: `${post.title} | Alô Virgília`,
@@ -97,11 +90,11 @@ export default function PostPage({ params }: { params: { slug: string } }) {
             </div>
             <h1 className="post-title">{post.title}</h1>
             {post.subtitle && <p className="post-subtitle">{post.subtitle}</p>}
-            <div className="post-byline">Por <strong>{post.author}</strong></div>
+            <div className="post-byline" style={{ fontSize: "1.1rem", fontWeight: 600, color: "var(--texto)", marginBottom: "1.5rem" }}>Por <strong>{post.author}</strong></div>
             {post.image && (
               <figure className="post-cover">
                 <img src={post.image} alt={post.title} />
-                {post.image_caption && <figcaption>{post.image_caption}</figcaption>}
+                {post.image_caption && <figcaption style={{ fontSize: "0.875rem", color: "var(--muted)", fontStyle: "italic", marginTop: "0.5rem" }}>{post.image_caption}</figcaption>}
               </figure>
             )}
           </header>
