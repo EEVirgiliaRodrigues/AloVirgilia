@@ -562,3 +562,9 @@ img { max-width: 100%; display: block; }
 :root .footer-link { color: #ccc !important; }
 :root .footer-text { color: #ccc !important; }
 :root footer, :root footer p, :root footer span { color: #ccc !important; }
+
+/* ── Post meta-top contraste ── */
+:root .post-meta-top { color: #bbb !important; }
+:root .post-date { color: #bbb !important; }
+:root .post-leitura { color: #bbb !important; }
+:root .post-category { color: var(--acento) !important; }
