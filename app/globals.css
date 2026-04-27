@@ -514,3 +514,34 @@ img { max-width: 100%; display: block; }
 
 /* ── Highlight na busca ── */
 .busca-highlight { background: rgba(200, 57, 43, 0.18); color: var(--acento); font-style: normal; padding: 0 2px; }
+
+/* ── Força contraste máximo no tema escuro ── */
+:root .manchete-titulo a,
+:root .manchete-titulo { color: #fff !important; }
+:root .manchete-sub { color: #ddd !important; }
+:root .manchete-meta { color: #bbb !important; }
+:root .gcard-titulo, :root .gcard-titulo a { color: #f5f2ec !important; }
+:root .gcard-meta { color: #bbb !important; }
+:root .post-title { color: #fff !important; }
+:root .post-subtitle { color: #ddd !important; }
+:root .post-byline { color: #bbb !important; }
+:root .post-body, :root .post-body p { color: #e8e5de !important; }
+:root .post-body h2, :root .post-body h3 { color: #fff !important; }
+:root .manchete-sec-titulo { color: #f5f2ec !important; }
+:root .manchete-sec-sub { color: #ccc !important; }
+:root .grade-label { color: #f5f2ec !important; }
+:root .arquivo-item-titulo a { color: #f5f2ec !important; }
+:root .arquivo-item-sub { color: #ccc !important; }
+:root .sidebar-label { color: #f5f2ec !important; }
+:root .ed-desc { color: #ccc !important; }
+
+/* Tema claro: override para branco não vazar */
+[data-theme="light"] .manchete-titulo a,
+[data-theme="light"] .manchete-titulo { color: #0d0c0a !important; }
+[data-theme="light"] .manchete-sub { color: #1a1816 !important; }
+[data-theme="light"] .gcard-titulo, [data-theme="light"] .gcard-titulo a { color: #0d0c0a !important; }
+[data-theme="light"] .post-title { color: #0d0c0a !important; }
+[data-theme="light"] .post-body, [data-theme="light"] .post-body p { color: #111008 !important; }
+[data-theme="light"] .post-body h2, [data-theme="light"] .post-body h3 { color: #0d0c0a !important; }
+[data-theme="light"] .manchete-sec-titulo { color: #0d0c0a !important; }
+[data-theme="light"] .arquivo-item-titulo a { color: #0d0c0a !important; }
