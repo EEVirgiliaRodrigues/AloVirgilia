@@ -36,7 +36,10 @@ export const usuarios: Usuario[] = [
   { email: '00001125539318sp@al.educacao.sp.gov.br', nome: 'Débora' },
   { email: '00001125854479sp@al.educacao.sp.gov.br', nome: 'Jhonatan' },
   { email: '00001118131010sp@al.educacao.sp.gov.br', nome: 'João Paulo' },
-  { email: '00001136686666sp@al.educacao.sp.gov.br', nome: 'Maria Luiza' }
+  { email: '00001136686666sp@al.educacao.sp.gov.br', nome: 'Maria Luiza' },
+  { email: '00001126048380sp@al.educacao.sp.gov.br', nome: 'Valentina' },
+  
+  
   
   
   // Adicione mais emails aqui:
