@@ -57,7 +57,7 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
     e.preventDefault()
     if (!tocadoRef.current) {
       tocadoRef.current = true
-      const audio = new Audio('/alo-virgilia.mp3')
+      const audio = new Audio('/uploads/alo-virgilia.mp3')
       audio.play().catch(() => {})
       audio.addEventListener('ended', () => router.push('/'))
     } else {
