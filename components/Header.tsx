@@ -22,12 +22,12 @@ const navLinks = [
 export default function Header({ posts = [] }: { posts?: Post[] }) {
   const [dataAtual, setDataAtual] = useState('')
   const [menuAberto, setMenuAberto] = useState(false)
-  const [tocado, setTocado] = useState(false)
   const pathname = usePathname()
   const tickerRef = useRef<HTMLDivElement>(null)
   const posRef = useRef(0)
   const rafRef = useRef<number>(0)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const tocadoRef = useRef(false)
 
   useEffect(() => {
     const d = new Date()
@@ -54,10 +54,10 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
     return () => cancelAnimationFrame(rafRef.current)
   }, [posts])
 
-  function tocarSom() {
-    if (tocado || !audioRef.current) return
+  function handleTituloClick() {
+    if (tocadoRef.current || !audioRef.current) return
+    tocadoRef.current = true
     audioRef.current.play()
-    setTocado(true)
   }
 
   function isActive(href: string) {
@@ -86,22 +86,10 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
             <span className="live-dot" />
             <span>Ao vivo da redação</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {!tocado && (
-              <button
-                className="musica-btn"
-                onClick={tocarSom}
-                aria-label="Tocar música"
-                title="Tocar música"
-              >
-                ▶ SOM
-              </button>
-            )}
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </div>
         <div className="header-brand-row">
-          <Link href="/" className="site-title">
+          <Link href="/" className="site-title" onClick={handleTituloClick}>
             <em>Alô</em> Virgília
           </Link>
           <div className="header-brand-right">
