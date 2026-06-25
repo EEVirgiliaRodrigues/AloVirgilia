@@ -22,10 +22,12 @@ const navLinks = [
 export default function Header({ posts = [] }: { posts?: Post[] }) {
   const [dataAtual, setDataAtual] = useState('')
   const [menuAberto, setMenuAberto] = useState(false)
+  const [tocando, setTocando] = useState(false)
   const pathname = usePathname()
   const tickerRef = useRef<HTMLDivElement>(null)
   const posRef = useRef(0)
   const rafRef = useRef<number>(0)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     const d = new Date()
@@ -55,6 +57,25 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
     return () => cancelAnimationFrame(rafRef.current)
   }, [posts])
 
+  useEffect(() => {
+    audioRef.current = new Audio('/alo-virgilia.mp3')
+    audioRef.current.loop = true
+    audioRef.current.volume = 0.5
+    return () => {
+      audioRef.current?.pause()
+    }
+  }, [])
+
+  function toggleMusica() {
+    if (!audioRef.current) return
+    if (tocando) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play()
+    }
+    setTocando(!tocando)
+  }
+
   function isActive(href: string) {
     if (href === '/') return pathname === '/'
     return pathname.startsWith(href)
@@ -80,7 +101,17 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
             <span className="live-dot" />
             <span>Ao vivo da redação</span>
           </div>
-          <ThemeToggle />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              className="musica-btn"
+              onClick={toggleMusica}
+              aria-label={tocando ? 'Pausar música' : 'Tocar música'}
+              title={tocando ? 'Pausar música' : 'Tocar música'}
+            >
+              {tocando ? '■ SOM' : '▶ SOM'}
+            </button>
+            <ThemeToggle />
+          </div>
         </div>
         <div className="header-brand-row">
           <Link href="/" className="site-title">
@@ -95,9 +126,7 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
               aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
               onClick={() => setMenuAberto(v => !v)}
             >
-              <span />
-              <span />
-              <span />
+              <span /><span /><span />
             </button>
           </div>
         </div>
