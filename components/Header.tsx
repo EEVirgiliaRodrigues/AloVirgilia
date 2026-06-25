@@ -1,7 +1,6 @@
 'use client'
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import ThemeToggle from './ThemeToggle'
 
 interface Post {
@@ -23,10 +22,10 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
   const [dataAtual, setDataAtual] = useState('')
   const [menuAberto, setMenuAberto] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
   const tickerRef = useRef<HTMLDivElement>(null)
   const posRef = useRef(0)
   const rafRef = useRef<number>(0)
-  const audioRef = useRef<HTMLAudioElement>(null)
   const tocadoRef = useRef(false)
 
   useEffect(() => {
@@ -54,10 +53,16 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
     return () => cancelAnimationFrame(rafRef.current)
   }, [posts])
 
-  function handleTituloClick() {
-    if (tocadoRef.current || !audioRef.current) return
-    tocadoRef.current = true
-    audioRef.current.play()
+  function handleTituloClick(e: React.MouseEvent) {
+    e.preventDefault()
+    if (!tocadoRef.current) {
+      tocadoRef.current = true
+      const audio = new Audio('/alo-virgilia.mp3')
+      audio.play().catch(() => {})
+      audio.addEventListener('ended', () => router.push('/'))
+    } else {
+      router.push('/')
+    }
   }
 
   function isActive(href: string) {
@@ -69,7 +74,6 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
 
   return (
     <header className="site-header">
-      <audio ref={audioRef} src="/alo-virgilia.mp3" preload="auto" />
       <div className="header-inner">
         {posts.length > 0 && (
           <div className="ticker-wrap" aria-hidden="true">
@@ -89,9 +93,9 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
           <ThemeToggle />
         </div>
         <div className="header-brand-row">
-          <Link href="/" className="site-title" onClick={handleTituloClick}>
+          <a href="/" className="site-title" onClick={handleTituloClick}>
             <em>Alô</em> Virgília
-          </Link>
+          </a>
           <div className="header-brand-right">
             <div className="header-edition">
               Jornalismo feito<br />por quem vive a escola
