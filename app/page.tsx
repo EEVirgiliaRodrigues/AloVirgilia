@@ -10,12 +10,12 @@ export default function Home() {
   const posts = getAllPosts()
 
   const destaque = posts.find(p => p.destaque) || posts[0]
-  // Secundárias: marcadas com secundaria: true, senão pega as 2 mais recentes
   const secundariasMarcadas = posts.filter(p => p.slug !== destaque?.slug && p.secundaria)
   const secundarias = secundariasMarcadas.length >= 2
     ? secundariasMarcadas.slice(0, 2)
     : posts.filter(p => p.slug !== destaque?.slug).slice(0, 2)
   const demais = posts.filter(p => p.slug !== destaque?.slug).slice(2, 8)
+  const resto = posts.filter(p => p.slug !== destaque?.slug).slice(8)
 
   return (
     <>
@@ -129,6 +129,25 @@ export default function Home() {
               </div>
             </section>
           )}
+
+          {resto.length > 0 && (
+            <section className="grade-section">
+              <div className="grade-header">
+                <span className="grade-label">Mais matérias</span>
+                <div className="grade-line" />
+              </div>
+              <div className="lista-compacta">
+                {resto.map((post) => (
+                  <a key={post.slug} href={`/post/${post.slug}`} className="lista-item">
+                    <span className={`lista-item-cat cat-${post.category}`}>{post.category.toUpperCase()}</span>
+                    <span className="lista-item-titulo">{post.title}</span>
+                    <span className="lista-item-meta">{post.author} · {formatDate(post.date)}</span>
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+
         </div>
       </main>
       <Footer />
