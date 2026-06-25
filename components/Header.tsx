@@ -1,6 +1,7 @@
 'use client'
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import ThemeToggle from './ThemeToggle'
 
 interface Post {
@@ -22,11 +23,9 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
   const [dataAtual, setDataAtual] = useState('')
   const [menuAberto, setMenuAberto] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
   const tickerRef = useRef<HTMLDivElement>(null)
   const posRef = useRef(0)
   const rafRef = useRef<number>(0)
-  const tocadoRef = useRef(false)
 
   useEffect(() => {
     const d = new Date()
@@ -53,16 +52,9 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
     return () => cancelAnimationFrame(rafRef.current)
   }, [posts])
 
-  function handleTituloClick(e: React.MouseEvent) {
-    e.preventDefault()
-    if (!tocadoRef.current) {
-      tocadoRef.current = true
-      const audio = new Audio('/uploads/alo-virgilia.mp3')
-      audio.play().catch(() => {})
-      audio.addEventListener('ended', () => router.push('/'))
-    } else {
-      router.push('/')
-    }
+  function tocarSom() {
+    const audio = new Audio('/uploads/alo-virgilia.mp3')
+    audio.play().catch(() => {})
   }
 
   function isActive(href: string) {
@@ -93,11 +85,11 @@ export default function Header({ posts = [] }: { posts?: Post[] }) {
           <ThemeToggle />
         </div>
         <div className="header-brand-row">
-          <a href="/" className="site-title" onClick={handleTituloClick}>
+          <Link href="/" className="site-title">
             <em>Alô</em> Virgília
-          </a>
+          </Link>
           <div className="header-brand-right">
-            <div className="header-edition">
+            <div className="header-edition" onClick={tocarSom} style={{ cursor: 'pointer' }}>
               Jornalismo feito<br />por quem vive a escola
             </div>
             <button
