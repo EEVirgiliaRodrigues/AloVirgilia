@@ -24,7 +24,7 @@ export default function EquipePage() {
             <div className="equipe-content">
               <p className="equipe-intro">
                 O <strong>Alô Virgília</strong> é um jornal escolar produzido pelos alunos da disciplina
-                eletiva de Jornalismo da <strong>EE Virgília Rodrigues Alves</strong>.
+                eletiva de Jornalismo da <strong>EE Virgília Rodrigues Alves</strong> organizada pelos professores Gabriel Petryla(Língua Portuguesa) e Marcelo Francisco(Filosofia)
               </p>
               <p className="equipe-intro">
                 Aqui, estudantes do ensino médio aprendem na prática: pautam, apuram, escrevem,
