@@ -139,9 +139,18 @@ export default function Home() {
               <div className="lista-compacta">
                 {resto.map((post) => (
                   <a key={post.slug} href={`/post/${post.slug}`} className="lista-item">
-                    <span className={`lista-item-cat cat-${post.category}`}>{post.category.toUpperCase()}</span>
-                    <span className="lista-item-titulo">{post.title}</span>
-                    <span className="lista-item-meta">{post.author} · {formatDate(post.date)}</span>
+                    {post.image ? (
+                      <div className="lista-item-img">
+                        <img src={post.image} alt={post.title} />
+                      </div>
+                    ) : (
+                      <div className={`lista-item-img-placeholder cat-${post.category}-bg`} />
+                    )}
+                    <div className="lista-item-body">
+                      <span className={`lista-item-cat cat-${post.category}`}>{post.category.toUpperCase()}</span>
+                      <span className="lista-item-titulo">{post.title}</span>
+                      <span className="lista-item-meta">{post.author} · {formatDate(post.date)}</span>
+                    </div>
                   </a>
                 ))}
               </div>
